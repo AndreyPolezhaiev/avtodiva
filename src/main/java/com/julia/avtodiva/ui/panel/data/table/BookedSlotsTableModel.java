@@ -1,0 +1,172 @@
+package com.julia.avtodiva.ui.panel.data.table;
+
+import com.julia.avtodiva.model.ScheduleSlot;
+import com.julia.avtodiva.model.Student;
+import com.julia.avtodiva.ui.state.AppState;
+
+import javax.swing.table.AbstractTableModel;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+public class BookedSlotsTableModel extends AbstractTableModel {
+    private final String[] columnNames = AppState.COLUMNS;
+    private final List<ScheduleSlot> slots;
+    private final List<Boolean> selected;
+
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+    public BookedSlotsTableModel(List<ScheduleSlot> slots) {
+        this.slots = new ArrayList<>(slots);
+        this.slots.sort(
+                Comparator.comparing(ScheduleSlot::getDate)
+                        .thenComparing(ScheduleSlot::getTimeFrom)
+        );
+
+        this.selected = new ArrayList<>();
+        for (int i = 0; i < this.slots.size(); i++) {
+            selected.add(false);
+        }
+    }
+
+    @Override
+    public int getRowCount() {
+        return slots.size();
+    }
+
+    @Override
+    public int getColumnCount() {
+        return columnNames.length;
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        return columnNames[column];
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return columnIndex == 0 ? Boolean.class : String.class;
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        if (columnIndex == 0) return true;
+
+        return selected.get(rowIndex);
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        ScheduleSlot slot = slots.get(rowIndex);
+        return switch (columnIndex) {
+            case 0 -> selected.get(rowIndex);
+            case 1 -> slot.getDate().format(dateFormatter);
+            case 2 -> slot.getInstructor().getName();
+            case 3 -> slot.getCar().getName();
+            case 4 -> slot.getTimeFrom() != null ? slot.getTimeFrom().format(timeFormatter) : "";
+            case 5 -> slot.getTimeTo() != null ? slot.getTimeTo().format(timeFormatter) : "";
+            case 6 -> slot.getStudent() != null ? slot.getStudent().getName() : "";
+            case 7 -> slot.getDescription();
+            case 8 -> slot.getLink();
+            default -> null;
+        };
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        ScheduleSlot slot = slots.get(rowIndex);
+
+        try {
+            switch (columnIndex) {
+                case 0 -> {
+                    if (aValue instanceof Boolean boolVal) {
+                        selected.set(rowIndex, boolVal);
+                    }
+                }
+                case 1 -> { // Дата
+                    if (aValue instanceof String dateStr) {
+                        slot.setDate(LocalDate.parse(dateStr, dateFormatter));
+                    }
+                }
+                case 2 -> { // Инструктор
+                    if (aValue instanceof String name) {
+                        slot.getInstructor().setName(name);
+                    }
+                }
+                case 3 -> { // Машина
+                    if (aValue instanceof String name) {
+                        slot.getCar().setName(name);
+                    }
+                }
+                case 4 -> { // Время с
+                    if (aValue instanceof String timeStr) {
+                        slot.setTimeFrom(LocalTime.parse(timeStr, timeFormatter));
+                    }
+                }
+                case 5 -> { // Время до
+                    if (aValue instanceof String timeStr) {
+                        slot.setTimeTo(LocalTime.parse(timeStr, timeFormatter));
+                    }
+                }
+                case 6 -> { // Ученица
+                    if (aValue instanceof String name) {
+                        if (slot.getStudent() != null) {
+                            slot.getStudent().setName(name);
+                        } else {
+                            Student student = new Student();
+                            student.setName(name);
+                            slot.setStudent(student);
+                        }
+                    }
+                }
+                case 7 -> {
+                    if (aValue instanceof String description) {
+                        slot.setDescription(description);
+                    }
+                }
+                case 8 -> {
+                    if (aValue instanceof String link) {
+                        slot.setLink(link);
+                    }
+                }
+            }
+            fireTableCellUpdated(rowIndex, columnIndex);
+        } catch (Exception e) {
+            System.err.println("Ошибка при редактировании ячейки: " + e.getMessage());
+        }
+    }
+
+    public List<ScheduleSlot> getSelectedSlots() {
+        List<ScheduleSlot> result = new ArrayList<>();
+        for (int i = 0; i < slots.size(); i++) {
+            if (selected.get(i)) {
+                ScheduleSlot slot = slots.get(i);
+
+                if (slot.getTimeFrom().isAfter(LocalTime.of(18, 0))) {
+                    slot.setTimeTo(slot.getTimeFrom().plusHours(2));
+
+                } else {
+                    slot.setTimeTo(slot.getTimeFrom().plusHours(3));
+                }
+
+                Student student = slot.getStudent();
+
+                if (student != null) {
+                    if (!student.getName().isEmpty()) {
+                        slot.setBooked(true);
+                    }
+                } else {
+                    slot.setBooked(false);
+                }
+
+                result.add(slot);
+            }
+        }
+        return result;
+    }
+}
