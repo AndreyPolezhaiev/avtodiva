@@ -5,6 +5,7 @@ import com.julia.avtodiva.ui.panel.data.AllSlotsPanel;
 import com.julia.avtodiva.ui.panel.data.BookedSlotsPanel;
 import com.julia.avtodiva.ui.panel.data.FreeSlotsPanel;
 import com.julia.avtodiva.ui.panel.RangeSelectionPanel;
+import com.julia.avtodiva.ui.panel.data.InstructorsPanel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,8 @@ public class MainFrame extends JFrame {
     public MainFrame(RangeSelectionPanel rangeSelectionPanel,
                      FreeSlotsPanel freeSlotsPanel,
                      AllSlotsPanel allSlotsPanel,
-                     BookedSlotsPanel bookedSlotsPanel) {
+                     BookedSlotsPanel bookedSlotsPanel,
+                     InstructorsPanel instructorsPanel) {
         setTitle("Автошкола");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(800, 600);
@@ -31,6 +33,7 @@ public class MainFrame extends JFrame {
         mainPanel.add(freeSlotsPanel, PanelName.FREE_SLOTS_PANEL.name());
         mainPanel.add(allSlotsPanel, PanelName.ALL_SLOTS_PANEL.name());
         mainPanel.add(bookedSlotsPanel, PanelName.BOOKED_SLOTS_PANEL.name());
+        mainPanel.add(instructorsPanel, PanelName.INSTRUCTOR_WEEKEND_PANEL.name());
         add(mainPanel);
         showPanel(PanelName.RANGE_SELECTION_PANEL.name());
     }

@@ -1,10 +1,14 @@
 package com.julia.avtodiva.service.instructor;
 
 import com.julia.avtodiva.model.Instructor;
+import com.julia.avtodiva.model.Weekend;
 
 import java.util.List;
 
 public interface InstructorService {
     List<Instructor> findAllInstructors();
-    void updateInstructor(Instructor instructor);
+    void saveInstructor(Instructor instructor);
+    void saveAllInstructors(List<Instructor> list);
+    Instructor findById(Long id);
+    Instructor findByName(String name);
 }

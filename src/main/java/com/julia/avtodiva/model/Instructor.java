@@ -14,6 +14,11 @@ public class Instructor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(
+            fetch = FetchType.EAGER,
+            mappedBy = "instructor",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<Weekend> weekends;
 }

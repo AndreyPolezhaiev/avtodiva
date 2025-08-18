@@ -1,10 +1,6 @@
 package com.julia.avtodiva.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -20,4 +16,7 @@ public class Weekend {
     private LocalDate day;
     private LocalTime timeFrom;
     private LocalTime timeTo;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "instructor_id", nullable = false)
+    private Instructor instructor;
 }
