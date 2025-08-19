@@ -1,24 +1,36 @@
+// Instructor.java
 package com.julia.avtodiva.model;
 
-
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table (name = "instructors")
-@Data
+@Table(name = "instructors")
+@Getter @Setter
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Instructor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
+
+    @ToString.Include
     private String name;
+
     @OneToMany(
-            fetch = FetchType.EAGER,
             mappedBy = "instructor",
             cascade = CascadeType.ALL,
-            orphanRemoval = true
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
     )
-    private List<Weekend> weekends;
+    @ToString.Exclude
+    private List<Weekend> weekends = new ArrayList<>();
 }

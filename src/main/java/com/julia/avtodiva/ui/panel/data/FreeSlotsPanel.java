@@ -7,6 +7,7 @@ import com.julia.avtodiva.ui.model.PanelName;
 import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.BookedSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.FreeSlotsTableModel;
+import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,12 @@ public class FreeSlotsPanel extends JPanel {
 
         FreeSlotsTableModel tableModel = new FreeSlotsTableModel(freeSlots);
         JTable table = new JTable(tableModel);
+
+        int[][] defaultHours = AppState.DEFAULT_HOURS;
+        TimeComboBoxEditor timeEditor = new TimeComboBoxEditor(defaultHours);
+        table.getColumnModel().getColumn(4).setCellEditor(timeEditor);
+        table.getColumnModel().getColumn(5).setCellEditor(timeEditor);
+
         JScrollPane scrollPane = new JScrollPane(table);
 
         add(scrollPane, BorderLayout.CENTER);

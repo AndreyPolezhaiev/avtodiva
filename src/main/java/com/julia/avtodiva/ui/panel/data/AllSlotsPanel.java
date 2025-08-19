@@ -5,8 +5,7 @@ import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
 import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
-import com.julia.avtodiva.ui.panel.data.table.editor.MultiLineCellEditor;
-import com.julia.avtodiva.ui.panel.data.table.renderer.MultiLineCellRenderer;
+import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.context.annotation.Lazy;
 
@@ -29,86 +28,22 @@ public class AllSlotsPanel extends JPanel {
 
     public void refreshAllSlots(List<ScheduleSlot> allSlots) {
         removeAll();
-        AllSlotsTableModel tableModel = new AllSlotsTableModel(allSlots);
-        JTable table = createTable(tableModel);
 
-        table.getColumnModel().getColumn(7).setCellRenderer(new MultiLineCellRenderer());
-        table.getColumnModel().getColumn(7).setCellEditor(new MultiLineCellEditor());
-        table.getColumnModel().getColumn(8).setCellRenderer(new MultiLineCellRenderer());
-        table.getColumnModel().getColumn(8).setCellEditor(new MultiLineCellEditor());
+        AllSlotsTableModel tableModel = new AllSlotsTableModel(allSlots);
+        JTable table = new JTable(tableModel);
+
+        int[][] defaultHours = AppState.DEFAULT_HOURS;
+        TimeComboBoxEditor timeEditor = new TimeComboBoxEditor(defaultHours);
+        table.getColumnModel().getColumn(4).setCellEditor(timeEditor);
+        table.getColumnModel().getColumn(5).setCellEditor(timeEditor);
 
         JScrollPane scrollPane = new JScrollPane(table);
+
         add(scrollPane, BorderLayout.CENTER);
         add(createBottomPanel(tableModel, table), BorderLayout.SOUTH);
 
-        // базовая (дефолтная) высота строки — видна обоим слушателям
-        final int baseRowHeight = table.getRowHeight();
-
-        table.addMouseListener(new java.awt.event.MouseAdapter() {
-            private int expandedRow = -1;
-
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                int viewRow = table.rowAtPoint(e.getPoint());
-                if (viewRow < 0) return;
-
-                if (viewRow == expandedRow) {
-                    table.setRowHeight(viewRow, baseRowHeight);
-                    expandedRow = -1;
-                } else {
-                    if (expandedRow != -1) table.setRowHeight(expandedRow, baseRowHeight);
-                    int h = computePreferredRowHeight(table, viewRow, new int[]{7, 8});
-                    table.setRowHeight(viewRow, Math.max(h, baseRowHeight));
-                    expandedRow = viewRow;
-                }
-            }
-        });
-
-        table.getColumnModel().addColumnModelListener(new javax.swing.event.TableColumnModelListener() {
-            @Override public void columnMarginChanged(javax.swing.event.ChangeEvent e) {
-                // пересчитать высоту раскрытой строки при изменении ширины колонок
-                for (int r = 0; r < table.getRowCount(); r++) {
-                    int rh = table.getRowHeight(r);
-                    if (rh > baseRowHeight) {
-                        int newH = computePreferredRowHeight(table, r, new int[]{7, 8});
-                        table.setRowHeight(r, Math.max(newH, baseRowHeight));
-                        break;
-                    }
-                }
-            }
-            @Override public void columnAdded(javax.swing.event.TableColumnModelEvent e) {}
-            @Override public void columnRemoved(javax.swing.event.TableColumnModelEvent e) {}
-            @Override public void columnMoved(javax.swing.event.TableColumnModelEvent e) {}
-            @Override public void columnSelectionChanged(javax.swing.event.ListSelectionEvent e) {}
-        });
-
         revalidate();
         repaint();
-    }
-
-    // Универсальный пересчёт требуемой высоты строки по набору колонок (wrap-aware)
-    // важно: java.awt.Component, иначе конфликт со Spring @Component
-    private static int computePreferredRowHeight(JTable table, int row, int[] columns) {
-        int max = table.getRowHeight();
-        for (int col : columns) {
-            if (col < 0 || col >= table.getColumnCount()) continue;
-            TableCellRenderer renderer = table.getCellRenderer(row, col);
-            java.awt.Component comp = table.prepareRenderer(renderer, row, col);
-            int colWidth = table.getColumnModel().getColumn(col).getWidth();
-            comp.setSize(colWidth, Integer.MAX_VALUE);        // подсказали реальную ширину
-            java.awt.Dimension pref = comp.getPreferredSize(); // и получили корректную высоту
-            max = Math.max(max, pref.height + table.getRowMargin());
-        }
-        return max + 2;
-    }
-
-
-
-    private JTable createTable(AllSlotsTableModel model) {
-        JTable table = new JTable(model);
-        table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        return table;
     }
 
     private JPanel createBottomPanel(AllSlotsTableModel tableModel, JTable table) {
