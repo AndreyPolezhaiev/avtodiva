@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.util.List;
 
 @Component
@@ -58,6 +59,22 @@ public class AllSlotsPanel extends JPanel {
     private JPanel createBottomPanel(AllSlotsTableModel tableModel, JTable table) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
+        JButton saveButton = getSaveButton(tableModel, table);
+
+        JButton copyButton = getCopyButton(tableModel);
+
+        JButton backButton = new JButton("Назад");
+        backButton.addActionListener(
+                l -> mainFrame.showPanel(PanelName.RANGE_SELECTION_PANEL.name())
+        );
+
+        panel.add(copyButton);
+        panel.add(saveButton);
+        panel.add(backButton);
+        return panel;
+    }
+
+    private JButton getSaveButton(AllSlotsTableModel tableModel, JTable table) {
         JButton saveButton = new JButton("Зберегти вибране");
         saveButton.addActionListener(e -> {
             if (table.isEditing()) table.getCellEditor().stopCellEditing();
@@ -76,13 +93,35 @@ public class AllSlotsPanel extends JPanel {
             );
             refreshAllSlots(updatedSlots);
         });
+        return saveButton;
+    }
 
-        JButton backButton = new JButton("Назад");
-        backButton.addActionListener(l -> mainFrame.showPanel(PanelName.RANGE_SELECTION_PANEL.name()));
+    private JButton getCopyButton(AllSlotsTableModel tableModel) {
+        JButton copyButton = new JButton("Копіювати вибране");
+        copyButton.addActionListener(e -> {
+            java.util.List<ScheduleSlot> selectedSlots = tableModel.getSelectedSlots();
+            if (selectedSlots.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Немає вибраних рядків", "Попередження", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
-        panel.add(saveButton);
-        panel.add(backButton);
-        return panel;
+            StringBuilder sb = new StringBuilder();
+            for (ScheduleSlot slot : selectedSlots) {
+                // колонки 1,2,3,4 → дата, інструктор, машина, час з
+                sb.append(slot.getDate()).append("\t")
+                        .append(slot.getInstructor().getName()).append("\t")
+                        .append(slot.getCar().getName()).append("\t")
+                        .append(slot.getTimeFrom() != null ? slot.getTimeFrom() : "")
+                        .append("\n");
+            }
+
+            StringSelection selection = new StringSelection(sb.toString());
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
+
+            JOptionPane.showMessageDialog(this, "Дані скопійовано у буфер обміну", "Інформація", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        return copyButton;
     }
 }
 

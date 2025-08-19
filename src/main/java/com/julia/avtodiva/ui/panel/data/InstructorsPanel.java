@@ -2,11 +2,13 @@
 package com.julia.avtodiva.ui.panel.data;
 
 import com.julia.avtodiva.model.Instructor;
+import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.model.Weekend;
 import com.julia.avtodiva.service.instructor.InstructorService;
 import com.julia.avtodiva.service.weekend.WeekendService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
+import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.InstructorWeekendsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.util.List;
 
 @Component
@@ -140,5 +143,33 @@ public class InstructorsPanel extends JPanel {
             refreshInstructor(fresh);
         });
         return addButton;
+    }
+
+    private JButton getCopyButton(JTable table, AllSlotsTableModel tableModel) {
+        JButton copyButton = new JButton("Копіювати вибране");
+        copyButton.addActionListener(e -> {
+            java.util.List<ScheduleSlot> selectedSlots = tableModel.getSelectedSlots();
+            if (selectedSlots.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Немає вибраних рядків", "Попередження", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (ScheduleSlot slot : selectedSlots) {
+                // колонки 1,2,3,4 → дата, інструктор, машина, час з
+                sb.append(slot.getDate()).append("\t")
+                        .append(slot.getInstructor().getName()).append("\t")
+                        .append(slot.getCar().getName()).append("\t")
+                        .append(slot.getTimeFrom() != null ? slot.getTimeFrom() : "")
+                        .append("\n");
+            }
+
+            StringSelection selection = new StringSelection(sb.toString());
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
+
+            JOptionPane.showMessageDialog(this, "Дані скопійовано у буфер обміну", "Інформація", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        return copyButton;
     }
 }

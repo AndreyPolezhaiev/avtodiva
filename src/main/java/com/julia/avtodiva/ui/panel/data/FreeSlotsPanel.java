@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.util.List;
 
 @Component
@@ -82,13 +83,44 @@ public class FreeSlotsPanel extends JPanel {
             refreshFreeSlots(updatedSlots);
         });
 
+        JButton copyButton = getCopyButton(tableModel);
+
         JButton backButton = new JButton("Назад");
         backButton.addActionListener(l -> {
             mainFrame.showPanel(PanelName.RANGE_SELECTION_PANEL.name());
         });
 
+        panel.add(copyButton);
         panel.add(saveButton);
         panel.add(backButton);
         return panel;
+    }
+
+    private JButton getCopyButton(FreeSlotsTableModel tableModel) {
+        JButton copyButton = new JButton("Копіювати вибране");
+        copyButton.addActionListener(e -> {
+            java.util.List<ScheduleSlot> selectedSlots = tableModel.getSelectedSlots();
+            if (selectedSlots.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Немає вибраних рядків", "Попередження", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (ScheduleSlot slot : selectedSlots) {
+                // колонки 1,2,3,4 → дата, інструктор, машина, час з
+                sb.append(slot.getDate()).append("\t")
+                        .append(slot.getInstructor().getName()).append("\t")
+                        .append(slot.getCar().getName()).append("\t")
+                        .append(slot.getTimeFrom() != null ? slot.getTimeFrom() : "")
+                        .append("\n");
+            }
+
+            StringSelection selection = new StringSelection(sb.toString());
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
+
+            JOptionPane.showMessageDialog(this, "Дані скопійовано у буфер обміну", "Інформація", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        return copyButton;
     }
 }
