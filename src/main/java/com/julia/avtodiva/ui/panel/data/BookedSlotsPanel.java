@@ -6,7 +6,9 @@ import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
 import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.BookedSlotsTableModel;
+import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
+import com.julia.avtodiva.ui.panel.data.table.renderer.LocalDateRenderer;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -31,11 +33,18 @@ public class BookedSlotsPanel extends JPanel {
 
         BookedSlotsTableModel tableModel = new BookedSlotsTableModel(bookedSlots);
         JTable table = new JTable(tableModel);
+        table.setRowHeight(AppState.COLUMN_HEIGHT);
 
         int[][] defaultHours = AppState.DEFAULT_HOURS;
         TimeComboBoxEditor timeEditor = new TimeComboBoxEditor(defaultHours);
         table.getColumnModel().getColumn(4).setCellEditor(timeEditor);
         table.getColumnModel().getColumn(5).setCellEditor(timeEditor);
+
+        DateComboBoxEditor dateEditor = new DateComboBoxEditor();
+        table.getColumnModel().getColumn(1).setCellEditor(dateEditor);
+
+        LocalDateRenderer dateRenderer = new LocalDateRenderer();
+        table.getColumnModel().getColumn(1).setCellRenderer(dateRenderer);
 
         JScrollPane scrollPane = new JScrollPane(table);
 
@@ -49,7 +58,7 @@ public class BookedSlotsPanel extends JPanel {
     private JPanel createBottomPanel(BookedSlotsTableModel tableModel, JTable table) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        JButton saveButton = new JButton("Сохранить выбранные");
+        JButton saveButton = new JButton("Зберегти вибране");
         saveButton.addActionListener(e -> {
             if (table.isEditing()) {
                 table.getCellEditor().stopCellEditing();
@@ -57,12 +66,12 @@ public class BookedSlotsPanel extends JPanel {
 
             List<ScheduleSlot> selectedSlots = tableModel.getSelectedSlots();
             if (selectedSlots.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Нет выбранных слотов", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Немає вибраних слотів", "Попередження", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             scheduleSlotService.saveAllSlots(selectedSlots);
-            JOptionPane.showMessageDialog(this, "Слоты успешно сохранены", "Успех", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Слоти успішно збережені", "Успіх", JOptionPane.INFORMATION_MESSAGE);
 
             List<ScheduleSlot> updatedSlots = scheduleSlotService.findBookedSlots(
                     AppState.instructorName,

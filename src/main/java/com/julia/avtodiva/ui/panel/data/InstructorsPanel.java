@@ -8,7 +8,9 @@ import com.julia.avtodiva.service.weekend.WeekendService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
 import com.julia.avtodiva.ui.panel.data.table.InstructorWeekendsTableModel;
+import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
+import com.julia.avtodiva.ui.panel.data.table.renderer.LocalDateRenderer;
 import com.julia.avtodiva.ui.panel.dialog.AddWeekendDialog;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.context.annotation.Lazy;
@@ -37,11 +39,18 @@ public class InstructorsPanel extends JPanel {
         final Long instructorId = instructor.getId();
         InstructorWeekendsTableModel tableModel = new InstructorWeekendsTableModel(instructor);
         JTable table = new JTable(tableModel);
+        table.setRowHeight(AppState.COLUMN_HEIGHT);
 
         int[][] defaultHours = AppState.DEFAULT_HOURS;
         TimeComboBoxEditor timeEditor = new TimeComboBoxEditor(defaultHours);
         table.getColumnModel().getColumn(3).setCellEditor(timeEditor);
         table.getColumnModel().getColumn(4).setCellEditor(timeEditor);
+
+        DateComboBoxEditor dateEditor = new DateComboBoxEditor();
+        table.getColumnModel().getColumn(2).setCellEditor(dateEditor);
+
+        LocalDateRenderer dateRenderer = new LocalDateRenderer();
+        table.getColumnModel().getColumn(2).setCellRenderer(dateRenderer);
 
         table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -74,16 +83,16 @@ public class InstructorsPanel extends JPanel {
     }
 
     private JButton getSaveButton(InstructorWeekendsTableModel tableModel, JTable table, Long instructorId) {
-        JButton saveButton = new JButton("Сохранить выбранные");
+        JButton saveButton = new JButton("Зберегти вибране");
         saveButton.addActionListener(e -> {
             if (table.isEditing()) table.getCellEditor().stopCellEditing();
             List<Weekend> selected = tableModel.getSelectedWeekends();
             if (selected.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Нет выбранных выходных", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Немає вибраних вихідних", "Попередження", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             weekendService.saveAllWeekends(selected);
-            JOptionPane.showMessageDialog(this, "Выходные успешно сохранены", "Успех", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Вихідні успішно збережені", "Успіх", JOptionPane.INFORMATION_MESSAGE);
             Instructor fresh = instructorService.findById(instructorId);
             refreshInstructor(fresh);
         });
@@ -91,21 +100,21 @@ public class InstructorsPanel extends JPanel {
     }
 
     private JButton getDeleteButton(InstructorWeekendsTableModel tableModel, JTable table, Long instructorId) {
-        JButton deleteButton = new JButton("Удалить выбранный выходной");
+        JButton deleteButton = new JButton("Видалити вибраний вихідний");
         deleteButton.addActionListener(e -> {
             if (table.isEditing()) table.getCellEditor().stopCellEditing();
             List<Weekend> selected = tableModel.getSelectedWeekends();
             if (selected.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Нет выбранных выходных", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Немає вибраних вихідних", "Попередження", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             String msg = selected.size() == 1
-                    ? "Удалить выбранный выходной?"
-                    : "Удалить выбранные выходные (" + selected.size() + " шт.)?";
-            int ans = JOptionPane.showConfirmDialog(this, msg, "Подтверждение", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    ? "Видалити вибраний вихідний?"
+                    : "Видалити вибраний вихідний (" + selected.size() + " шт.)?";
+            int ans = JOptionPane.showConfirmDialog(this, msg, "Підтвердження", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (ans == JOptionPane.YES_OPTION) {
                 weekendService.deleteAllWeekends(selected); // реализуй в сервисе удаление списка
-                JOptionPane.showMessageDialog(this, "Удаление выполнено", "Готово", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Видалення виконано", "Готово", JOptionPane.INFORMATION_MESSAGE);
                 Instructor fresh = instructorService.findById(instructorId);
                 refreshInstructor(fresh);
             }
@@ -114,7 +123,7 @@ public class InstructorsPanel extends JPanel {
     }
 
     private JButton getAddButton(JTable table, Long instructorId) {
-        JButton addButton = new JButton("Добавить выходной");
+        JButton addButton = new JButton("Додати вихідний");
         addButton.addActionListener(e -> {
             if (table.isEditing()) table.getCellEditor().stopCellEditing();
 

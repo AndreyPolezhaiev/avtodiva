@@ -15,32 +15,67 @@ import java.util.List;
 @Repository
 public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long> {
 
-    @Query("SELECT s FROM ScheduleSlot s WHERE s.booked = true " +
-            "AND s.instructor.name = :instructorName AND s.car.name = :carName " +
-            "AND s.date BETWEEN :start AND :end")
+    @Query("""
+        SELECT s FROM ScheduleSlot s
+        WHERE s.booked = true
+          AND s.instructor.name = :instructorName
+          AND s.car.name = :carName
+          AND s.date BETWEEN :start AND :end
+          AND NOT EXISTS (
+              SELECT w FROM Weekend w
+              WHERE w.instructor = s.instructor
+                AND w.day = s.date
+                AND s.timeFrom < w.timeTo
+                AND s.timeTo > w.timeFrom
+          )
+        """)
     List<ScheduleSlot> findBookedSlotsBetween(
             @Param("instructorName") String instructorName,
             @Param("carName") String carName,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
 
-    @Query("SELECT s FROM ScheduleSlot s WHERE s.booked = false " +
-            "AND s.instructor.name = :instructorName AND s.car.name = :carName " +
-            "AND s.date BETWEEN :start AND :end")
+
+    @Query("""
+        SELECT s FROM ScheduleSlot s
+        WHERE s.booked = false
+          AND s.instructor.name = :instructorName
+          AND s.car.name = :carName
+          AND s.date BETWEEN :start AND :end
+          AND NOT EXISTS (
+              SELECT w FROM Weekend w
+              WHERE w.instructor = s.instructor
+                AND w.day = s.date
+                AND s.timeFrom < w.timeTo
+                AND s.timeTo > w.timeFrom
+          )
+        """)
     List<ScheduleSlot> findFreeSlotsBetween(
             @Param("instructorName") String instructorName,
             @Param("carName") String carName,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
 
-    @Query("SELECT s FROM ScheduleSlot s WHERE s.instructor.name = :instructorName " +
-            "AND s.car.name = :carName " +
-            "AND s.date BETWEEN :start AND :end")
+
+    @Query("""
+        SELECT s FROM ScheduleSlot s
+        WHERE s.instructor.name = :instructorName
+          AND s.car.name = :carName
+          AND s.date BETWEEN :start AND :end
+          AND NOT EXISTS (
+              SELECT w FROM Weekend w
+              WHERE w.instructor = s.instructor
+                AND w.day = s.date
+                AND s.timeFrom < w.timeTo
+                AND s.timeTo > w.timeFrom
+          )
+        """)
     List<ScheduleSlot> findAllSlots(
             @Param("instructorName") String instructorName,
             @Param("carName") String carName,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
+
 
     boolean existsByDateAndTimeFromAndInstructorAndCar(
             LocalDate date,
@@ -49,3 +84,4 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
             Car car
     );
 }
+

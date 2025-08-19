@@ -12,7 +12,6 @@ import com.julia.avtodiva.ui.panel.data.BookedSlotsPanel;
 import com.julia.avtodiva.ui.panel.data.FreeSlotsPanel;
 import com.julia.avtodiva.ui.panel.data.InstructorsPanel;
 import com.julia.avtodiva.ui.panel.dialog.AddWindowsDialog;
-import com.julia.avtodiva.ui.panel.dialog.BookWindowDialog;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -55,10 +54,10 @@ public class RangeSelectionPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        JLabel label = new JLabel("Просмотреть окна на");
+        JLabel label = new JLabel("Переглянути вікна на");
         numberField = new JTextField(5);
-        daysButton = new JRadioButton("дней", true);
-        JRadioButton weeksButton = new JRadioButton("недель");
+        daysButton = new JRadioButton("днів", true);
+        JRadioButton weeksButton = new JRadioButton("тижнів");
 
         ButtonGroup group = new ButtonGroup();
         group.add(daysButton);
@@ -86,37 +85,29 @@ public class RangeSelectionPanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 5;
-        add(showFreeSlots("Просмотреть свободные окна"), gbc);
+        add(showFreeSlots("Переглянути вільні вікна"), gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 5;
-        add(showBookedSlots("Просмотреть занятые окна"), gbc);
+        add(showBookedSlots("Переглянути зайняті вікна"), gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.gridwidth = 5;
-        add(showAllSlots("Просмотреть все окна"), gbc);
+        add(showAllSlots("Переглянути всі вікна"), gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 5;
-        add(showInstructorsWeekends("Просмотреть инструкторов и их выходные"), gbc);
+        add(showInstructorsWeekends("Переглянути інструкторів та їхні вихідні"), gbc);
 
-        // Добавить окно
         gbc.gridx = 0;
         gbc.gridy = 6;
         gbc.gridwidth = 5;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(20, 5, 5, 5);
-        add(bookWindow("Добавить запись"), gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 7;
-        gbc.gridwidth = 5;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(20, 5, 5, 5);
-        add(addFreeWindows("Добавить свободные места для записей"), gbc);
+        add(addFreeWindows("Додати вільні місця для запису"), gbc);
     }
 
     private JButton showBookedSlots(String name) {
@@ -139,7 +130,7 @@ public class RangeSelectionPanel extends JPanel {
                         .orElse(null);
 
                 if (selectedInstructor == null || selectedCar == null) {
-                    JOptionPane.showMessageDialog(this, "Выберите и инструктора, и машину", "Ошибка выбора", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Виберіть інструктора і машину", "Помилка вибору", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -157,7 +148,7 @@ public class RangeSelectionPanel extends JPanel {
                 mainFrame.showPanel(PanelName.BOOKED_SLOTS_PANEL.name());
 
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Введите корректное положительное число.", "Ошибка ввода", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Введіть коректне позитивне число.", "Помилка вводу", JOptionPane.ERROR_MESSAGE);
             }
         });
         return viewButton;
@@ -183,7 +174,7 @@ public class RangeSelectionPanel extends JPanel {
                         .orElse(null);
 
                 if (selectedInstructor == null || selectedCar == null) {
-                    JOptionPane.showMessageDialog(this, "Выберите и инструктора, и машину", "Ошибка выбора", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Виберіть і інструктора, і машину", "Помилка вибору", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -201,7 +192,7 @@ public class RangeSelectionPanel extends JPanel {
                 mainFrame.showPanel(PanelName.FREE_SLOTS_PANEL.name());
 
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Введите корректное положительное число.", "Ошибка ввода", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Введіть коректне позитивне число.", "Помилка вводу", JOptionPane.ERROR_MESSAGE);
             }
         });
         return viewButton;
@@ -227,7 +218,7 @@ public class RangeSelectionPanel extends JPanel {
                         .orElse(null);
 
                 if (selectedInstructor == null || selectedCar == null) {
-                    JOptionPane.showMessageDialog(this, "Выберите и инструктора, и машину", "Ошибка выбора", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Виберіть і інструктора, і машину", "Помилка вибору", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -245,7 +236,7 @@ public class RangeSelectionPanel extends JPanel {
                 mainFrame.showPanel(PanelName.ALL_SLOTS_PANEL.name());
 
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Введите корректное положительное число.", "Ошибка ввода", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Введіть коректне позитивне число.", "Помилка вводу", JOptionPane.ERROR_MESSAGE);
             }
         });
         return viewButton;
@@ -261,7 +252,7 @@ public class RangeSelectionPanel extends JPanel {
                         .orElse(null);
 
                 if (selectedInstructor == null) {
-                    JOptionPane.showMessageDialog(this, "Выберите инструктора", "Ошибка выбора", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Виберіть інструктора", "Помилка вибору", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -280,8 +271,8 @@ public class RangeSelectionPanel extends JPanel {
     private JPanel createInstructorCarButtonGrid() {
         JPanel gridPanel = new JPanel(new GridLayout(5, 2, 10, 10)); // 5 строк
 
-        String[] instructors = {"Таня", "Марина", "Христина", "Ксюша", "Іра"};
-        String[] cars = {"Фея", "Мерлин", "Мавка", "Фрея", "На своїй"};
+        String[] instructors = AppState.INSTRUCTORS;
+        String[] cars = AppState.CARS;
 
         ButtonGroup instructorGroup = new ButtonGroup();
         ButtonGroup carGroup = new ButtonGroup();
@@ -301,16 +292,6 @@ public class RangeSelectionPanel extends JPanel {
         }
 
         return gridPanel;
-    }
-
-    private JButton bookWindow(String name) {
-        JButton addWindowButton = new JButton(name);
-        addWindowButton.addActionListener(e -> {
-            BookWindowDialog dialog = new BookWindowDialog((JFrame) SwingUtilities.getWindowAncestor(this), windowService);
-            dialog.setVisible(true);
-        });
-
-        return addWindowButton;
     }
 
     private JButton addFreeWindows(String name) {

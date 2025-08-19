@@ -33,7 +33,7 @@ public class AddWeekendDialog extends JDialog {
                             Long instructorId,
                             InstructorService instructorService,
                             WeekendService weekendService) {
-        super(parent, "Добавить выходной", ModalityType.APPLICATION_MODAL);
+        super(parent, "Додати вихідний", ModalityType.APPLICATION_MODAL);
         this.instructorId = instructorId;
         this.instructorService = instructorService;
         this.weekendService = weekendService;
@@ -53,16 +53,16 @@ public class AddWeekendDialog extends JDialog {
         c.insets = new Insets(6, 8, 6, 8);
         c.gridx = 0; c.gridy = 0; c.anchor = GridBagConstraints.LINE_END;
         form.add(new JLabel("Дата:"), c);
-        c.gridy = 1; form.add(new JLabel("Время с:"), c);
-        c.gridy = 2; form.add(new JLabel("Время до:"), c);
+        c.gridy = 1; form.add(new JLabel("Час з:"), c);
+        c.gridy = 2; form.add(new JLabel("Час до:"), c);
 
         c.gridx = 1; c.gridy = 0; c.anchor = GridBagConstraints.LINE_START;
         form.add(dateSp, c);
         c.gridy = 1; form.add(fromSp, c);
         c.gridy = 2; form.add(toSp, c);
 
-        JButton ok = new JButton("Добавить");
-        JButton cancel = new JButton("Отмена");
+        JButton ok = new JButton("Додати");
+        JButton cancel = new JButton("Відхилити");
         ok.addActionListener(e -> onSave());
         cancel.addActionListener(e -> dispose());
 
@@ -85,7 +85,7 @@ public class AddWeekendDialog extends JDialog {
             LocalTime tTo   = dt.toInstant().atZone(zone).toLocalTime().withSecond(0).withNano(0);
 
             if (!tTo.isAfter(tFrom)) {
-                JOptionPane.showMessageDialog(this, "«Время до» должно быть позже «Время с».", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "«Час до» повинен бути після «Час з».", "Помилка", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -97,10 +97,10 @@ public class AddWeekendDialog extends JDialog {
             w.setInstructor(inst);
 
             weekendService.saveAllWeekends(Collections.singletonList(w));
-            JOptionPane.showMessageDialog(this, "Выходной добавлен", "Успех", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Вихідний доданий", "Успіх", JOptionPane.INFORMATION_MESSAGE);
             dispose();
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Не удалось сохранить выходной. Проверьте данные.", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Не вдалося зберегти вихідний. Перевірте дані.", "Помилка", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -110,7 +110,7 @@ public class AddWeekendDialog extends JDialog {
         SpinnerDateModel model = new SpinnerDateModel(init, null, null, java.util.Calendar.DAY_OF_MONTH);
         JSpinner sp = new JSpinner(model);
         JSpinner.DateEditor ed = new JSpinner.DateEditor(sp, "EEEE, dd.MM.yyyy");
-        java.text.DateFormatSymbols dfs = java.text.DateFormatSymbols.getInstance(new Locale("ru", "UA"));
+        java.text.DateFormatSymbols dfs = java.text.DateFormatSymbols.getInstance(new Locale("uk", "UA"));
         ed.getFormat().setDateFormatSymbols(dfs);
         sp.setEditor(ed);
         sp.setPreferredSize(new Dimension(200, sp.getPreferredSize().height));

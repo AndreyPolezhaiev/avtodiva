@@ -11,7 +11,7 @@ public class AddWindowsDialog extends JDialog {
     private final JTextField daysField = new JTextField();
 
     public AddWindowsDialog(JFrame parent, WindowService windowService) {
-        super(parent, "Добавить свободные окна", true);
+        super(parent, "Додати вільні вікна", true);
         setSize(400, 200);
         setLocationRelativeTo(parent);
         setLayout(new GridLayout(2, 2, 10, 10));
@@ -22,10 +22,10 @@ public class AddWindowsDialog extends JDialog {
         }
         JComboBox<Integer> daysBox = new JComboBox<>(dayOptions.toArray(new Integer[0]));
 
-        add(new JLabel("Количество дней:"));
+        add(new JLabel("Кількість днів:"));
         add(daysBox);
 
-        JButton saveButton = new JButton("Добавить");
+        JButton saveButton = new JButton("Додати");
         add(new JLabel());
         add(saveButton);
 
@@ -37,7 +37,7 @@ public class AddWindowsDialog extends JDialog {
 
                 dispose();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Введите корректное положительное число дней.", "Ошибка ввода", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Введіть коректне позитивне число днів.", "Помилка вводу", JOptionPane.ERROR_MESSAGE);
             }
         });
     }

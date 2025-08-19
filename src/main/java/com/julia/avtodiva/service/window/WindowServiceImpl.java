@@ -77,8 +77,10 @@ public class WindowServiceImpl implements WindowService {
                         slot.setTimeTo(to);
                         slot.setInstructor(instructor);
                         slot.setCar(car);
-                        slot.setBooked(false);
                         slot.setStudent(null);
+                        slot.setDescription(null);
+                        slot.setLink(null);
+                        slot.setBooked(false);
 
                         scheduleSlotRepository.save(slot);
                     }

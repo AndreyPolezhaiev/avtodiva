@@ -7,7 +7,6 @@ import com.julia.avtodiva.ui.state.AppState;
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -16,9 +15,6 @@ public class AllSlotsTableModel extends AbstractTableModel {
     private final String[] columnNames = AppState.COLUMNS;
     private final List<ScheduleSlot> slots;
     private final List<Boolean> selected;
-
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
     public AllSlotsTableModel(List<ScheduleSlot> slots) {
         this.slots = new ArrayList<>(slots);
@@ -50,7 +46,12 @@ public class AllSlotsTableModel extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        return columnIndex == 0 ? Boolean.class : String.class;
+        return switch (columnIndex) {
+            case 0 -> Boolean.class;
+            case 1 -> LocalDate.class;
+            case 4, 5 -> LocalTime.class;
+            default -> String.class;
+        };
     }
 
     @Override
@@ -65,11 +66,11 @@ public class AllSlotsTableModel extends AbstractTableModel {
         ScheduleSlot slot = slots.get(rowIndex);
         return switch (columnIndex) {
             case 0 -> selected.get(rowIndex);
-            case 1 -> slot.getDate().format(dateFormatter);
+            case 1 -> slot.getDate();
             case 2 -> slot.getInstructor().getName();
             case 3 -> slot.getCar().getName();
-            case 4 -> slot.getTimeFrom() != null ? slot.getTimeFrom().format(timeFormatter) : "";
-            case 5 -> slot.getTimeTo() != null ? slot.getTimeTo().format(timeFormatter) : "";
+            case 4 -> slot.getTimeFrom() != null ? slot.getTimeFrom() : "";
+            case 5 -> slot.getTimeTo() != null ? slot.getTimeTo() : "";
             case 6 -> slot.getStudent() != null ? slot.getStudent().getName() : "";
             case 7 -> slot.getDescription();
             case 8 -> slot.getLink();
@@ -89,8 +90,8 @@ public class AllSlotsTableModel extends AbstractTableModel {
                     }
                 }
                 case 1 -> { // Дата
-                    if (aValue instanceof String dateStr) {
-                        slot.setDate(LocalDate.parse(dateStr, dateFormatter));
+                    if (aValue instanceof LocalDate localDate) {
+                        slot.setDate(localDate);
                     }
                 }
                 case 2 -> { // Инструктор
@@ -104,13 +105,13 @@ public class AllSlotsTableModel extends AbstractTableModel {
                     }
                 }
                 case 4 -> { // Время с
-                    if (aValue instanceof String timeStr) {
-                        slot.setTimeFrom(LocalTime.parse(timeStr, timeFormatter));
+                    if (aValue instanceof LocalTime timeFrom) {
+                        slot.setTimeFrom(timeFrom);
                     }
                 }
                 case 5 -> { // Время до
-                    if (aValue instanceof String timeStr) {
-                        slot.setTimeTo(LocalTime.parse(timeStr, timeFormatter));
+                    if (aValue instanceof LocalTime timeTo) {
+                        slot.setTimeTo(timeTo);
                     }
                 }
                 case 6 -> { // Ученица
@@ -137,7 +138,7 @@ public class AllSlotsTableModel extends AbstractTableModel {
             }
             fireTableCellUpdated(rowIndex, columnIndex);
         } catch (Exception e) {
-            System.err.println("Ошибка при редактировании ячейки: " + e.getMessage());
+            System.err.println("Помилка при редагуванні комірки: " + e.getMessage());
         }
     }
 
