@@ -49,6 +49,14 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
                 AND s.timeFrom < w.timeTo
                 AND s.timeTo > w.timeFrom
           )
+          AND NOT EXISTS (
+              SELECT s2 FROM ScheduleSlot s2
+              WHERE s2.car = s.car
+                AND s2.date = s.date
+                AND s2.booked = true
+                AND s2.timeFrom < s.timeTo
+                AND s2.timeTo > s.timeFrom
+          )
         """)
     List<ScheduleSlot> findFreeSlotsBetween(
             @Param("instructorName") String instructorName,
@@ -69,6 +77,14 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
                 AND s.timeFrom < w.timeTo
                 AND s.timeTo > w.timeFrom
           )
+          AND NOT EXISTS (
+              SELECT s2 FROM ScheduleSlot s2
+              WHERE s2.car = s.car
+                AND s2.date = s.date
+                AND s2.booked = true
+                AND s2.timeFrom < s.timeTo
+                AND s2.timeTo > s.timeFrom
+          )
         """)
     List<ScheduleSlot> findAllSlots(
             @Param("instructorName") String instructorName,
@@ -84,4 +100,3 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
             Car car
     );
 }
-
