@@ -38,8 +38,13 @@ public class TimeComboBoxEditor extends DefaultCellEditor {
         Object v = combo.getEditor().getItem();
         String s = v == null ? "" : v.toString().trim();
         try {
-            if (!s.isEmpty()) s = LocalTime.parse(s.length() == 4 ? "0" + s : s, DateTimeFormatter.ofPattern("H:mm")).format(tf);
+            if (!s.isEmpty()) {
+                return LocalTime.parse(
+                        s.length() == 4 ? "0" + s : s,
+                        DateTimeFormatter.ofPattern("H:mm")
+                );
+            }
         } catch (Exception ignore) {}
-        return s;
+        return null;
     }
 }

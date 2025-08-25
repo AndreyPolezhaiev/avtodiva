@@ -11,89 +11,89 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long> {
 
     @Query("""
-        SELECT s FROM ScheduleSlot s
-        WHERE s.booked = true
-          AND s.instructor.name = :instructorName
-          AND s.car.name = :carName
-          AND s.date BETWEEN :start AND :end
-          AND NOT EXISTS (
-              SELECT w FROM Weekend w
-              WHERE w.instructor = s.instructor
-                AND w.day = s.date
-                AND s.timeFrom < w.timeTo
-                AND s.timeTo > w.timeFrom
-          )
-        """)
+            SELECT s FROM ScheduleSlot s
+            WHERE s.booked = true
+              AND LOWER(s.instructor.name) IN :instructorNames
+              AND LOWER(s.car.name) IN :carNames
+              AND s.date BETWEEN :start AND :end
+              AND NOT EXISTS (
+                  SELECT w FROM Weekend w
+                  WHERE w.instructor = s.instructor
+                    AND w.day = s.date
+                    AND s.timeFrom < w.timeTo
+                    AND s.timeTo > w.timeFrom
+              )
+            """)
     List<ScheduleSlot> findBookedSlotsBetween(
-            @Param("instructorName") String instructorName,
-            @Param("carName") String carName,
+            @Param("instructorNames") List<String> instructorNames,
+            @Param("carNames") List<String> carNames,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
 
 
     @Query("""
-        SELECT s FROM ScheduleSlot s
-        WHERE s.booked = false
-          AND s.instructor.name = :instructorName
-          AND s.car.name = :carName
-          AND s.date BETWEEN :start AND :end
-          AND NOT EXISTS (
-              SELECT w FROM Weekend w
-              WHERE w.instructor = s.instructor
-                AND w.day = s.date
-                AND s.timeFrom < w.timeTo
-                AND s.timeTo > w.timeFrom
-          )
-          AND NOT EXISTS (
-              SELECT s2 FROM ScheduleSlot s2
-              WHERE s2.car = s.car
-                AND s2.date = s.date
-                AND s2.booked = true
-                AND s2.timeFrom < s.timeTo
-                AND s2.timeTo > s.timeFrom
-          )
-        """)
+            SELECT s FROM ScheduleSlot s
+            WHERE s.booked = false
+              AND LOWER(s.instructor.name) IN :instructorNames
+              AND LOWER(s.car.name) IN :carNames
+              AND s.date BETWEEN :start AND :end
+              AND NOT EXISTS (
+                  SELECT w FROM Weekend w
+                  WHERE w.instructor = s.instructor
+                    AND w.day = s.date
+                    AND s.timeFrom < w.timeTo
+                    AND s.timeTo > w.timeFrom
+              )
+              AND NOT EXISTS (
+                  SELECT s2 FROM ScheduleSlot s2
+                  WHERE s2.car = s.car
+                    AND s2.date = s.date
+                    AND s2.booked = true
+                    AND s2.timeFrom < s.timeTo
+                    AND s2.timeTo > s.timeFrom
+              )
+            """)
     List<ScheduleSlot> findFreeSlotsBetween(
-            @Param("instructorName") String instructorName,
-            @Param("carName") String carName,
+            @Param("instructorNames") List<String> instructorNames,
+            @Param("carNames") List<String> carNames,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
 
 
     @Query("""
-        SELECT s FROM ScheduleSlot s
-        WHERE s.instructor.name = :instructorName
-          AND s.car.name = :carName
-          AND s.date BETWEEN :start AND :end
-          AND NOT EXISTS (
-              SELECT w FROM Weekend w
-              WHERE w.instructor = s.instructor
-                AND w.day = s.date
-                AND s.timeFrom < w.timeTo
-                AND s.timeTo > w.timeFrom
-          )
-          AND NOT EXISTS (
-              SELECT s2 FROM ScheduleSlot s2
-              WHERE s2.car = s.car
-                AND s2.date = s.date
-                AND s2.booked = true
-                AND s2.timeFrom < s.timeTo
-                AND s2.timeTo > s.timeFrom
-          )
-        """)
+            SELECT s FROM ScheduleSlot s
+            WHERE LOWER(s.instructor.name) IN :instructorNames
+              AND LOWER(s.car.name) IN :carNames
+              AND s.date BETWEEN :start AND :end
+              AND NOT EXISTS (
+                  SELECT w FROM Weekend w
+                  WHERE w.instructor = s.instructor
+                    AND w.day = s.date
+                    AND s.timeFrom < w.timeTo
+                    AND s.timeTo > w.timeFrom
+              )
+            """)
     List<ScheduleSlot> findAllSlots(
-            @Param("instructorName") String instructorName,
-            @Param("carName") String carName,
+            @Param("instructorNames") List<String> instructorNames,
+            @Param("carNames") List<String> carNames,
             @Param("start") LocalDate start,
             @Param("end") LocalDate end);
 
 
     boolean existsByDateAndTimeFromAndInstructorAndCar(
+            LocalDate date,
+            LocalTime timeFrom,
+            Instructor instructor,
+            Car car
+    );
+
+    ScheduleSlot findByDateAndTimeFromAndInstructorAndCar(
             LocalDate date,
             LocalTime timeFrom,
             Instructor instructor,

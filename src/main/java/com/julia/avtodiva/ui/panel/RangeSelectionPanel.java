@@ -116,10 +116,9 @@ public class RangeSelectionPanel extends JPanel {
         add(addFreeWindows("Додати вільні місця для запису"), gbc);
     }
 
-    // универсальный метод для кнопок "свободные/занятые/все"
     @FunctionalInterface
     private interface SlotAction {
-        void run(String instructor, String car, int days);
+        void run(List<String> instructors, List<String> cars, int days);
     }
 
     private JButton createSlotsButton(String name, SlotAction action) {
@@ -129,31 +128,30 @@ public class RangeSelectionPanel extends JPanel {
                 int value = Integer.parseInt(numberField.getText().trim());
                 if (value <= 0) throw new NumberFormatException();
 
-                String selectedInstructor = instructorButtons.stream()
+                List<String> selectedInstructors = instructorButtons.stream()
                         .filter(AbstractButton::isSelected)
                         .map(b -> b.getText().toLowerCase())
-                        .findFirst()
-                        .orElse(null);
+                        .toList();
 
-                String selectedCar = carButtons.stream()
+                List<String> selectedCars = carButtons.stream()
                         .filter(AbstractButton::isSelected)
                         .map(b -> b.getText().toLowerCase())
-                        .findFirst()
-                        .orElse(null);
+                        .toList();
 
-                if (selectedInstructor == null || selectedCar == null) {
+                if (selectedInstructors.isEmpty() || selectedCars.isEmpty()) {
                     JOptionPane.showMessageDialog(this,
-                            "Виберіть інструктора і машину",
+                            "Виберіть хоча б одного інструктора і машину",
                             "Помилка вибору",
                             JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
                 AppState.daysAhead = daysButton.isSelected() ? value : value * 7;
-                AppState.instructorName = selectedInstructor;
-                AppState.carName = selectedCar;
 
-                action.run(AppState.instructorName, AppState.carName, AppState.daysAhead);
+                AppState.instructorNames = selectedInstructors;
+                AppState.carNames = selectedCars;
+
+                action.run(selectedInstructors, selectedCars, AppState.daysAhead);
 
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this,
@@ -182,7 +180,7 @@ public class RangeSelectionPanel extends JPanel {
                 return;
             }
 
-            AppState.instructorName = selectedInstructor;
+            AppState.instructorNames = List.of(selectedInstructor);
 
             Instructor instructor = instructorService.findByName(selectedInstructor);
             instructorsPanel.refreshInstructor(instructor);
@@ -195,15 +193,9 @@ public class RangeSelectionPanel extends JPanel {
     private JPanel createInstructorCarButtonGrid() {
         JPanel gridPanel = new JPanel(new GridLayout(AppState.INSTRUCTORS.length, 2, 10, 10));
 
-        ButtonGroup instructorGroup = new ButtonGroup();
-        ButtonGroup carGroup = new ButtonGroup();
-
         for (int i = 0; i < AppState.INSTRUCTORS.length; i++) {
             JToggleButton instructorButton = new JToggleButton(AppState.INSTRUCTORS[i]);
             JToggleButton carButton = new JToggleButton(AppState.CARS[i]);
-
-            instructorGroup.add(instructorButton);
-            carGroup.add(carButton);
 
             instructorButtons.add(instructorButton);
             carButtons.add(carButton);
@@ -214,6 +206,7 @@ public class RangeSelectionPanel extends JPanel {
 
         return gridPanel;
     }
+
 
     private JButton addFreeWindows(String name) {
         JButton addWindowButton = new JButton(name);

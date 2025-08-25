@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Lazy;
 
 import org.springframework.stereotype.Component;
 import javax.swing.*;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.util.List;
@@ -85,11 +84,38 @@ public class AllSlotsPanel extends JPanel {
                 return;
             }
 
-            scheduleSlotService.saveAllSlots(selectedSlots);
-            JOptionPane.showMessageDialog(this, "Слоти успішно добавлені", "Успіх", JOptionPane.INFORMATION_MESSAGE);
+            int saved = 0;
+            int failed = 0;
+
+            for (ScheduleSlot slot : selectedSlots) {
+                try {
+                    // пробуем применить изменения через сервис
+                    boolean ok = scheduleSlotService.rescheduleSlot(slot, slot);
+                    if (ok) {
+                        saved++;
+                    } else {
+                        failed++;
+                    }
+                } catch (Exception ex) {
+                    failed++;
+                    JOptionPane.showMessageDialog(this,
+                            "Слот " + slot.getDate() + " " + slot.getTimeFrom() +
+                                    " (" + slot.getInstructor().getName() + ", " + slot.getCar().getName() + ") вже зайнятий!",
+                            "Помилка",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }
+
+            if (saved > 0) {
+                JOptionPane.showMessageDialog(this, "Успішно збережено: " + saved + " слотів", "Успіх", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+            if (failed > 0) {
+                JOptionPane.showMessageDialog(this, "Не вдалося зберегти: " + failed + " слотів", "Помилка", JOptionPane.WARNING_MESSAGE);
+            }
 
             List<ScheduleSlot> updatedSlots = scheduleSlotService.findAllSlots(
-                    AppState.instructorName, AppState.carName, AppState.daysAhead
+                    AppState.instructorNames, AppState.carNames, AppState.daysAhead
             );
             refreshAllSlots(updatedSlots);
         });

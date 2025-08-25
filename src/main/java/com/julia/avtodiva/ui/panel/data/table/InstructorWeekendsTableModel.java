@@ -53,8 +53,8 @@ public class InstructorWeekendsTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        if (columnIndex == 0) return true;      // чекбокс
-        if (columnIndex == 1) return false;     // имя инструктора нередактируемо
+        if (columnIndex == 0) return true;
+        if (columnIndex == 1) return false;
         return Boolean.TRUE.equals(selected.get(rowIndex));
     }
 
