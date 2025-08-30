@@ -75,56 +75,66 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
 
     @Override
     @Transactional
-    public boolean rescheduleSlot(ScheduleSlot oldSlot, ScheduleSlot newSlot) {
-        // Если ключевые поля не изменились — просто обновляем данные
-        if (oldSlot.getDate().equals(newSlot.getDate()) &&
-                oldSlot.getTimeFrom().equals(newSlot.getTimeFrom()) &&
-                oldSlot.getInstructor().equals(newSlot.getInstructor()) &&
-                oldSlot.getCar().equals(newSlot.getCar())) {
+    public boolean rescheduleSlot(ScheduleSlot slot) {
+        // достаём актуальный слот из базы по id
+        ScheduleSlot existing = scheduleSlotRepository.findById(slot.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Slot not found"));
 
-            oldSlot.setTimeTo(newSlot.getTimeTo());
-            oldSlot.setStudent(newSlot.getStudent());
-            oldSlot.setBooked(newSlot.isBooked());
-            scheduleSlotRepository.save(oldSlot);
+        // проверяем, изменились ли ключевые поля
+        boolean changed =
+                !existing.getInstructor().getName().equalsIgnoreCase(slot.getInstructor().getName()) ||
+                        !existing.getCar().getName().equalsIgnoreCase(slot.getCar().getName()) ||
+                        !existing.getDate().equals(slot.getDate()) ||
+                        !existing.getTimeFrom().equals(slot.getTimeFrom());
+
+        if (!changed) {
+            // ничего важного не изменилось → просто обновляем
+            existing.setDescription(slot.getDescription());
+            existing.setLink(slot.getLink());
+            existing.setStudent(slot.getStudent());
+            existing.setBooked(slot.isBooked());
+            scheduleSlotRepository.save(existing);
             return true;
         }
 
-        // Проверяем, есть ли уже слот с новой комбинацией
-        ScheduleSlot existing = scheduleSlotRepository.findByDateAndTimeFromAndInstructorAndCar(
-                newSlot.getDate(),
-                newSlot.getTimeFrom(),
-                newSlot.getInstructor(),
-                newSlot.getCar()
-        );
+        // 1. освобождаем старый слот
+        existing.setBooked(false);
+        existing.setStudent(null);
+        scheduleSlotRepository.save(existing);
 
-        if (existing != null) {
-            if (existing.isBooked()) {
-                throw new IllegalStateException("Слот вже зайнятий іншим учнем!");
+        // 2. ищем слот с новыми параметрами
+        ScheduleSlot target = scheduleSlotRepository.findByInstructorCarDateTime(
+                slot.getInstructor().getName().toLowerCase(),
+                slot.getCar().getName().toLowerCase(),
+                slot.getDate(),
+                slot.getTimeFrom()
+        ).orElse(null);
+
+        if (target != null) {
+            if (target.isBooked()) {
+                throw new IllegalStateException("Target slot already booked!");
             }
-
-            // Освободить старый
-            oldSlot.setBooked(false);
-            oldSlot.setStudent(null);
-            scheduleSlotRepository.save(oldSlot);
-
-            // Занять существующий
-            existing.setBooked(true);
-            existing.setStudent(newSlot.getStudent());
-            existing.setTimeTo(newSlot.getTimeTo());
-            scheduleSlotRepository.save(existing);
+            // занимаем найденный слот
+            target.setBooked(true);
+            target.setStudent(slot.getStudent());
+            target.setDescription(slot.getDescription());
+            target.setLink(slot.getLink());
+            scheduleSlotRepository.save(target);
+            return true;
         } else {
-            // Обновляем старый слот, а не создаём новый
-            oldSlot.setDate(newSlot.getDate());
-            oldSlot.setTimeFrom(newSlot.getTimeFrom());
-            oldSlot.setTimeTo(newSlot.getTimeTo());
-            oldSlot.setInstructor(newSlot.getInstructor());
-            oldSlot.setCar(newSlot.getCar());
-            oldSlot.setStudent(newSlot.getStudent());
-            oldSlot.setBooked(true);
-            scheduleSlotRepository.save(oldSlot);
+            // если такого слота ещё нет → создаём новый
+            ScheduleSlot created = new ScheduleSlot();
+            created.setDate(slot.getDate());
+            created.setTimeFrom(slot.getTimeFrom());
+            created.setTimeTo(slot.getTimeTo());
+            created.setInstructor(slot.getInstructor());
+            created.setCar(slot.getCar());
+            created.setStudent(slot.getStudent());
+            created.setDescription(slot.getDescription());
+            created.setLink(slot.getLink());
+            created.setBooked(true);
+            scheduleSlotRepository.save(created);
+            return true;
         }
-
-        return true;
     }
-
 }

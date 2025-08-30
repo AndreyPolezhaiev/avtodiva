@@ -93,10 +93,15 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
             Car car
     );
 
-    ScheduleSlot findByDateAndTimeFromAndInstructorAndCar(
-            LocalDate date,
-            LocalTime timeFrom,
-            Instructor instructor,
-            Car car
+    @Query("SELECT s FROM ScheduleSlot s " +
+            "WHERE LOWER(s.instructor.name) = LOWER(:instructor) " +
+            "AND LOWER(s.car.name) = LOWER(:car) " +
+            "AND s.date = :date " +
+            "AND s.timeFrom = :timeFrom")
+    Optional<ScheduleSlot> findByInstructorCarDateTime(
+            @Param("instructor") String instructor,
+            @Param("car") String car,
+            @Param("date") LocalDate date,
+            @Param("timeFrom") LocalTime timeFrom
     );
 }

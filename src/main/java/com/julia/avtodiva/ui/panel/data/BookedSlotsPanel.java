@@ -75,9 +75,18 @@ public class BookedSlotsPanel extends JPanel {
             int failed = 0;
 
             for (ScheduleSlot slot : selectedSlots) {
+                if (slot.getStudent() == null || slot.getStudent().getName() == null || slot.getStudent().getName().isBlank()) {
+                    JOptionPane.showMessageDialog(this,
+                            "Не вказано ім'я студента для слота "
+                                    + slot.getDate() + " " + slot.getTimeFrom(),
+                            "Помилка", JOptionPane.WARNING_MESSAGE);
+                    failed++;
+                    continue; // пропускаем сохранение этого слота
+                }
+
                 try {
                     // пробуем применить изменения через сервис
-                    boolean ok = scheduleSlotService.rescheduleSlot(slot, slot);
+                    boolean ok = scheduleSlotService.rescheduleSlot(slot);
                     if (ok) {
                         saved++;
                     } else {

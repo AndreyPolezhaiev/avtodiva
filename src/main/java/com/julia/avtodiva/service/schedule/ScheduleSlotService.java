@@ -12,5 +12,5 @@ public interface ScheduleSlotService {
     List<ScheduleSlot> findFreeSlots(List<String> instructorNames, List<String> carNames, int daysAhead);
     void updateSlot(ScheduleSlot slot);
     void saveAllSlots(List<ScheduleSlot> slots);
-    public boolean rescheduleSlot(ScheduleSlot slot, ScheduleSlot oldSlot);
+    public boolean rescheduleSlot(ScheduleSlot slot);
 }

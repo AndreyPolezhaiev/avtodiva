@@ -194,14 +194,22 @@ public class RangeSelectionPanel extends JPanel {
         JPanel gridPanel = new JPanel(new GridLayout(AppState.INSTRUCTORS.length, 2, 10, 10));
 
         for (int i = 0; i < AppState.INSTRUCTORS.length; i++) {
-            JToggleButton instructorButton = new JToggleButton(AppState.INSTRUCTORS[i]);
-            JToggleButton carButton = new JToggleButton(AppState.CARS[i]);
+            if (i < AppState.INSTRUCTORS.length) {
+                JToggleButton b = new JToggleButton(AppState.INSTRUCTORS[i]);
+                instructorButtons.add(b);
+                gridPanel.add(b);
+            } else {
+                gridPanel.add(new JLabel("")); // заполнитель
+            }
 
-            instructorButtons.add(instructorButton);
-            carButtons.add(carButton);
-
-            gridPanel.add(instructorButton);
-            gridPanel.add(carButton);
+            // Правая колонка — машины
+            if (i < AppState.CARS.length) {
+                JToggleButton b = new JToggleButton(AppState.CARS[i]);
+                carButtons.add(b);
+                gridPanel.add(b);
+            } else {
+                gridPanel.add(new JLabel("")); // заполнитель
+            }
         }
 
         return gridPanel;
