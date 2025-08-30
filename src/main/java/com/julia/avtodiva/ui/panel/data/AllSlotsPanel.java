@@ -1,6 +1,7 @@
 package com.julia.avtodiva.ui.panel.data;
 
 import com.julia.avtodiva.model.ScheduleSlot;
+import com.julia.avtodiva.model.Student;
 import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
@@ -8,6 +9,7 @@ import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.renderer.LocalDateRenderer;
+import com.julia.avtodiva.ui.panel.dialog.SlotDetailsDialog;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.context.annotation.Lazy;
 
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Component;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 @Component
@@ -33,6 +37,7 @@ public class AllSlotsPanel extends JPanel {
 
         AllSlotsTableModel tableModel = new AllSlotsTableModel(allSlots);
         JTable table = new JTable(tableModel);
+        addStudentClickListener(table, tableModel, allSlots);
         table.setRowHeight(AppState.COLUMN_HEIGHT);
 
         int[][] defaultHours = AppState.DEFAULT_HOURS;
@@ -53,6 +58,29 @@ public class AllSlotsPanel extends JPanel {
 
         revalidate();
         repaint();
+    }
+
+    private void addStudentClickListener(JTable table, AllSlotsTableModel tableModel, List<ScheduleSlot> allSlots) {
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
+
+                if (col >= 6 && row >= 0) { // колонка "Учениця"
+                    boolean isSelected = (Boolean) tableModel.getValueAt(row, 0);
+                    ScheduleSlot slot = tableModel.getSlotAt(row);
+
+                    new SlotDetailsDialog(
+                            SwingUtilities.getWindowAncestor(table),
+                            tableModel,
+                            slot,
+                            row,
+                            isSelected
+                    ).setVisible(true);
+                }
+            }
+        });
     }
 
     private JPanel createBottomPanel(AllSlotsTableModel tableModel, JTable table) {
