@@ -55,6 +55,10 @@ public class BookedSlotsTableModel extends AbstractTableModel {
         };
     }
 
+    public ScheduleSlot getSlotAt(int rowIndex) {
+        return slots.get(rowIndex);
+    }
+
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         if (columnIndex == 0) return true;

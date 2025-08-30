@@ -37,7 +37,7 @@ public class AllSlotsPanel extends JPanel {
 
         AllSlotsTableModel tableModel = new AllSlotsTableModel(allSlots);
         JTable table = new JTable(tableModel);
-        addStudentClickListener(table, tableModel, allSlots);
+        addStudentClickListener(table, tableModel);
         table.setRowHeight(AppState.COLUMN_HEIGHT);
 
         int[][] defaultHours = AppState.DEFAULT_HOURS;
@@ -60,7 +60,7 @@ public class AllSlotsPanel extends JPanel {
         repaint();
     }
 
-    private void addStudentClickListener(JTable table, AllSlotsTableModel tableModel, List<ScheduleSlot> allSlots) {
+    private void addStudentClickListener(JTable table, AllSlotsTableModel tableModel) {
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

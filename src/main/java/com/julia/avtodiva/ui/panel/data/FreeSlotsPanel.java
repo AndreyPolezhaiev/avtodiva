@@ -10,6 +10,7 @@ import com.julia.avtodiva.ui.panel.data.table.FreeSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.renderer.LocalDateRenderer;
+import com.julia.avtodiva.ui.panel.dialog.SlotDetailsDialog;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Component;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 @Component
@@ -35,6 +38,7 @@ public class FreeSlotsPanel extends JPanel {
 
         FreeSlotsTableModel tableModel = new FreeSlotsTableModel(freeSlots);
         JTable table = new JTable(tableModel);
+        addStudentClickListener(table, tableModel);
         table.setRowHeight(AppState.COLUMN_HEIGHT);
 
         int[][] defaultHours = AppState.DEFAULT_HOURS;
@@ -55,6 +59,29 @@ public class FreeSlotsPanel extends JPanel {
 
         revalidate();
         repaint();
+    }
+
+    private void addStudentClickListener(JTable table, FreeSlotsTableModel tableModel) {
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
+
+                if (col >= 6 && row >= 0) { // колонка "Учениця"
+                    boolean isSelected = (Boolean) tableModel.getValueAt(row, 0);
+                    ScheduleSlot slot = tableModel.getSlotAt(row);
+
+                    new SlotDetailsDialog(
+                            SwingUtilities.getWindowAncestor(table),
+                            tableModel,
+                            slot,
+                            row,
+                            isSelected
+                    ).setVisible(true);
+                }
+            }
+        });
     }
 
     private JPanel createBottomPanel(FreeSlotsTableModel tableModel, JTable table) {

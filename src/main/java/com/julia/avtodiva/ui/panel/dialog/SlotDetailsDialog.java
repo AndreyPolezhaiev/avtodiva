@@ -4,19 +4,20 @@ import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
 
 import javax.swing.*;
+import javax.swing.table.TableModel;
 import java.awt.*;
 
 public class SlotDetailsDialog extends JDialog {
     private final boolean editable;
     private final int row;
-    private final AllSlotsTableModel tableModel;
+    private final TableModel tableModel;
     private final ScheduleSlot slot;
 
     private JTextField studentField;
     private JTextArea descArea;
     private JTextArea linkArea;
 
-    public SlotDetailsDialog(Window parent, AllSlotsTableModel tableModel, ScheduleSlot slot, int row, boolean editable) {
+    public SlotDetailsDialog(Window parent, TableModel tableModel, ScheduleSlot slot, int row, boolean editable) {
         super(parent, "Деталі слота", ModalityType.APPLICATION_MODAL);
         this.tableModel = tableModel;
         this.slot = slot;
