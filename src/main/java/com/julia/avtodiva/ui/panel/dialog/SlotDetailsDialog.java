@@ -1,11 +1,11 @@
 package com.julia.avtodiva.ui.panel.dialog;
 
 import com.julia.avtodiva.model.ScheduleSlot;
-import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 
 public class SlotDetailsDialog extends JDialog {
     private final boolean editable;
@@ -101,19 +101,24 @@ public class SlotDetailsDialog extends JDialog {
         if (editable) {
             JButton saveBtn = new JButton("Зберегти");
             saveBtn.addActionListener(e -> onSave());
-            JButton tgBtn = new JButton("Відправити в Telegram");
-            tgBtn.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                    "Функціонал відправки у Telegram ще не реалізовано",
-                    "Інформація", JOptionPane.INFORMATION_MESSAGE));
+
+            JButton copyBtn = new JButton("Копіювати");
+            copyBtn.addActionListener(e -> onCopy());
+
             JButton cancelBtn = new JButton("Відмінити");
             cancelBtn.addActionListener(e -> dispose());
 
             buttons.add(saveBtn);
-            buttons.add(tgBtn);
+            buttons.add(copyBtn);
             buttons.add(cancelBtn);
         } else {
+            JButton copyBtn = new JButton("Копіювати");
+            copyBtn.addActionListener(e -> onCopy());
+
             JButton closeBtn = new JButton("Закрити");
             closeBtn.addActionListener(e -> dispose());
+
+            buttons.add(copyBtn);
             buttons.add(closeBtn);
         }
         return buttons;
@@ -124,5 +129,34 @@ public class SlotDetailsDialog extends JDialog {
         tableModel.setValueAt(descArea.getText(), row, 7);
         tableModel.setValueAt(linkArea.getText(), row, 8);
         dispose();
+    }
+
+    private void onCopy() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("📅 Дата: ").append(slot.getDate()).append("\n");
+        sb.append("⏰ Час: ").append(slot.getTimeFrom()).append(" - ").append(slot.getTimeTo()).append("\n");
+        sb.append("🚗 Машина: ").append(slot.getCar().getName()).append("\n");
+        sb.append("👩‍🏫 Інструктор: ").append(slot.getInstructor().getName()).append("\n");
+
+        String student = studentField.getText();
+        if (student != null && !student.isBlank()) {
+            sb.append("👩‍🎓 Учениця: ").append(student).append("\n");
+        }
+        String desc = descArea.getText();
+        if (desc != null && !desc.isBlank()) {
+            sb.append("📝 Опис: ").append(desc).append("\n");
+        }
+        String link = linkArea.getText();
+        if (link != null && !link.isBlank()) {
+            sb.append("🔗 Посилання: ").append(link).append("\n");
+        }
+
+        StringSelection selection = new StringSelection(sb.toString());
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
+
+        JOptionPane.showMessageDialog(this,
+                "Інформацію скопійовано у буфер обміну",
+                "Інформація",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 }

@@ -87,8 +87,8 @@ public class AllSlotsPanel extends JPanel {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
         JButton saveButton = getSaveButton(tableModel, table);
-
         JButton copyButton = getCopyButton(tableModel);
+        JButton freeButton = getFreeButton(tableModel, table);
 
         JButton backButton = new JButton("Назад");
         backButton.addActionListener(
@@ -97,6 +97,7 @@ public class AllSlotsPanel extends JPanel {
 
         panel.add(copyButton);
         panel.add(saveButton);
+        panel.add(freeButton);
         panel.add(backButton);
         return panel;
     }
@@ -136,8 +137,13 @@ public class AllSlotsPanel extends JPanel {
                 } catch (Exception ex) {
                     failed++;
                     JOptionPane.showMessageDialog(this,
-                            "Слот " + slot.getDate() + " " + slot.getTimeFrom() +
-                                    " (" + slot.getInstructor().getName() + ", " + slot.getCar().getName() + ") вже зайнятий!",
+                            "Слот " + slot.getDate()
+                                    + " " + slot.getTimeFrom()
+                                    + " ("
+                                    + slot.getInstructor().getName()
+                                    + " або іншим інструктором"
+                                    + ", на машині " + slot.getCar().getName()
+                                    + ") вже зайнятий!",
                             "Помилка",
                             JOptionPane.WARNING_MESSAGE);
                 }
@@ -186,5 +192,51 @@ public class AllSlotsPanel extends JPanel {
 
         return copyButton;
     }
+
+    private JButton getFreeButton(AllSlotsTableModel tableModel, JTable table) {
+        JButton freeButton = new JButton("Звільнити місце");
+        freeButton.addActionListener(e -> {
+            if (table.isEditing()) table.getCellEditor().stopCellEditing();
+
+            int[] selectedRows = table.getSelectedRows();
+            if (selectedRows.length == 0) {
+                JOptionPane.showMessageDialog(this, "Немає вибраних слотів", "Попередження", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int freed = 0;
+            for (int row : selectedRows) {
+                ScheduleSlot slot = tableModel.getSlotAt(row);
+                if (slot.isBooked()) {
+                    try {
+                        // освобождаем слот
+                        slot.setBooked(false);
+                        slot.setStudent(null);
+                        slot.setDescription(null);
+                        slot.setLink(null);
+
+                        scheduleSlotService.updateSlot(slot);
+                        freed++;
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(this,
+                                "Не вдалося звільнити слот " + slot.getDate() + " " + slot.getTimeFrom(),
+                                "Помилка",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+            }
+
+            if (freed > 0) {
+                JOptionPane.showMessageDialog(this, "Звільнено слотів: " + freed, "Успіх", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+            List<ScheduleSlot> updatedSlots = scheduleSlotService.findAllSlots(
+                    AppState.instructorNames, AppState.carNames, AppState.daysAhead
+            );
+            refreshAllSlots(updatedSlots);
+        });
+        return freeButton;
+    }
+
 }
 

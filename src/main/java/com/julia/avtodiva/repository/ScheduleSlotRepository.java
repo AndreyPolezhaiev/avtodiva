@@ -104,4 +104,21 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
             @Param("date") LocalDate date,
             @Param("timeFrom") LocalTime timeFrom
     );
+
+    @Query("""
+    SELECT COUNT(s) > 0 FROM ScheduleSlot s
+    WHERE s.car = :car
+      AND s.date = :date
+      AND s.booked = true
+      AND s.timeFrom < :timeTo
+      AND s.timeTo > :timeFrom
+      AND (:excludeId IS NULL OR s.id <> :excludeId)
+    """)
+    boolean existsBookedCarConflictExcluding(
+            @Param("car") Car car,
+            @Param("date") LocalDate date,
+            @Param("timeFrom") LocalTime timeFrom,
+            @Param("timeTo") LocalTime timeTo,
+            @Param("excludeId") Long excludeId
+    );
 }

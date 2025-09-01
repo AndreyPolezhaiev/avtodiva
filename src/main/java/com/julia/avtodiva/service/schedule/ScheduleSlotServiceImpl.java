@@ -88,6 +88,16 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
                         !existing.getTimeFrom().equals(slot.getTimeFrom());
 
         if (!changed) {
+            // проверка: у машины не должно быть других занятых слотов в это время
+            if (scheduleSlotRepository.existsBookedCarConflictExcluding(
+                    slot.getCar(),
+                    slot.getDate(),
+                    slot.getTimeFrom(),
+                    slot.getTimeTo(),
+                    existing.getId() // исключаем сам slot, иначе он всегда даст конфликт
+            )) {
+                throw new IllegalStateException("Ця машина вже зайнята у цей час!");
+            }
             // ничего важного не изменилось → просто обновляем
             existing.setDescription(slot.getDescription());
             existing.setLink(slot.getLink());
@@ -100,6 +110,8 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
         // 1. освобождаем старый слот
         existing.setBooked(false);
         existing.setStudent(null);
+        existing.setDescription("Якщо запис є у вільних місцях то можна зайняти, інакше буде помилка");
+        existing.setLink("Якщо запис є у вільних місцях то можна зайняти, інакше буде помилка");
         scheduleSlotRepository.save(existing);
 
         // 2. ищем слот с новыми параметрами
@@ -114,6 +126,18 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
             if (target.isBooked()) {
                 throw new IllegalStateException("Target slot already booked!");
             }
+
+            // проверка: у машины не должно быть других занятых слотов в это время
+            if (scheduleSlotRepository.existsBookedCarConflictExcluding(
+                    slot.getCar(),
+                    slot.getDate(),
+                    slot.getTimeFrom(),
+                    slot.getTimeTo(),
+                    target.getId() // исключаем сам slot, иначе он всегда даст конфликт
+            )) {
+                throw new IllegalStateException("Ця машина вже зайнята у цей час!");
+            }
+
             // занимаем найденный слот
             target.setBooked(true);
             target.setStudent(slot.getStudent());
@@ -122,6 +146,17 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
             scheduleSlotRepository.save(target);
             return true;
         } else {
+            // проверка: у машины не должно быть других занятых слотов в это время
+            if (scheduleSlotRepository.existsBookedCarConflictExcluding(
+                    slot.getCar(),
+                    slot.getDate(),
+                    slot.getTimeFrom(),
+                    slot.getTimeTo(),
+                    target.getId() // исключаем сам slot, иначе он всегда даст конфликт
+            )) {
+                throw new IllegalStateException("Ця машина вже зайнята у цей час!");
+            }
+
             // если такого слота ещё нет → создаём новый
             ScheduleSlot created = new ScheduleSlot();
             created.setDate(slot.getDate());

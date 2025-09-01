@@ -4,7 +4,6 @@ import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
-import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.BookedSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
@@ -122,8 +121,13 @@ public class BookedSlotsPanel extends JPanel {
                 } catch (Exception ex) {
                     failed++;
                     JOptionPane.showMessageDialog(this,
-                            "Слот " + slot.getDate() + " " + slot.getTimeFrom() +
-                                    " (" + slot.getInstructor().getName() + ", " + slot.getCar().getName() + ") вже зайнятий!",
+                            "Слот " + slot.getDate()
+                                    + " " + slot.getTimeFrom()
+                                    + " ("
+                                    + slot.getInstructor().getName()
+                                    + " або іншим інструктором"
+                                    + ", на машині " + slot.getCar().getName()
+                                    + ") вже зайнятий!",
                             "Помилка",
                             JOptionPane.WARNING_MESSAGE);
                 }
@@ -145,7 +149,7 @@ public class BookedSlotsPanel extends JPanel {
         });
 
         JButton copyButton = getCopyButton(tableModel);
-
+        JButton freeButton = getFreeButton(tableModel, table);
         JButton backButton = new JButton("Назад");
         backButton.addActionListener(l -> {
             mainFrame.showPanel(PanelName.RANGE_SELECTION_PANEL.name());
@@ -153,6 +157,7 @@ public class BookedSlotsPanel extends JPanel {
 
         panel.add(copyButton);
         panel.add(saveButton);
+        panel.add(freeButton);
         panel.add(backButton);
         return panel;
     }
@@ -183,5 +188,50 @@ public class BookedSlotsPanel extends JPanel {
         });
 
         return copyButton;
+    }
+
+    private JButton getFreeButton(BookedSlotsTableModel tableModel, JTable table) {
+        JButton freeButton = new JButton("Звільнити місце");
+        freeButton.addActionListener(e -> {
+            if (table.isEditing()) table.getCellEditor().stopCellEditing();
+
+            int[] selectedRows = table.getSelectedRows();
+            if (selectedRows.length == 0) {
+                JOptionPane.showMessageDialog(this, "Немає вибраних слотів", "Попередження", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int freed = 0;
+            for (int row : selectedRows) {
+                ScheduleSlot slot = tableModel.getSlotAt(row);
+                if (slot.isBooked()) {
+                    try {
+                        // освобождаем слот
+                        slot.setBooked(false);
+                        slot.setStudent(null);
+                        slot.setDescription(null);
+                        slot.setLink(null);
+
+                        scheduleSlotService.updateSlot(slot);
+                        freed++;
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(this,
+                                "Не вдалося звільнити слот " + slot.getDate() + " " + slot.getTimeFrom(),
+                                "Помилка",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+            }
+
+            if (freed > 0) {
+                JOptionPane.showMessageDialog(this, "Звільнено слотів: " + freed, "Успіх", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+            List<ScheduleSlot> updatedSlots = scheduleSlotService.findBookedSlots(
+                    AppState.instructorNames, AppState.carNames, AppState.daysAhead
+            );
+            refreshBookedSlots(updatedSlots);
+        });
+        return freeButton;
     }
 }

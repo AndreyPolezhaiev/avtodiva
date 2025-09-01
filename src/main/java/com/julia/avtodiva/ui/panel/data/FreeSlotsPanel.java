@@ -4,8 +4,6 @@ import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
-import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
-import com.julia.avtodiva.ui.panel.data.table.BookedSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.FreeSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
@@ -123,8 +121,13 @@ public class FreeSlotsPanel extends JPanel {
                 } catch (Exception ex) {
                     failed++;
                     JOptionPane.showMessageDialog(this,
-                            "Слот " + slot.getDate() + " " + slot.getTimeFrom() +
-                                    " (" + slot.getInstructor().getName() + ", " + slot.getCar().getName() + ") вже зайнятий!",
+                            "Слот " + slot.getDate()
+                                    + " " + slot.getTimeFrom()
+                                    + " ("
+                                    + slot.getInstructor().getName()
+                                    + " або іншим інструктором"
+                                    + ", на машині " + slot.getCar().getName()
+                                    + ") вже зайнятий!",
                             "Помилка",
                             JOptionPane.WARNING_MESSAGE);
                 }
