@@ -64,86 +64,65 @@ public class RangeSelectionPanel extends JPanel {
 
     private void buildUI() {
         removeAll();
+        setLayout(new BorderLayout(10, 10));
 
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        JLabel label = new JLabel("Переглянути вікна на");
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.add(new JLabel("Переглянути вікна на"));
         numberField = new JTextField(5);
+        topPanel.add(numberField);
         daysButton = new JRadioButton("днів", true);
         JRadioButton weeksButton = new JRadioButton("тижнів");
-
         ButtonGroup group = new ButtonGroup();
         group.add(daysButton);
         group.add(weeksButton);
+        topPanel.add(daysButton);
+        topPanel.add(weeksButton);
 
-        gbc.gridx = 0; gbc.gridy = 0;
-        add(label, gbc);
+        add(topPanel, BorderLayout.NORTH);
 
-        gbc.gridx = 1;
-        add(numberField, gbc);
+        // Центральная часть: сетка с двумя колонками
+        JPanel centerPanel = new JPanel(new GridLayout(1, 2, 20, 0));
 
-        gbc.gridx = 2;
-        add(daysButton, gbc);
-
-        gbc.gridx = 3;
-        add(weeksButton, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 5;
-        add(createInstructorCarButtonGrid(), gbc);
-
-        gbc.gridy = 2;
-        add(createSlotsButton("Переглянути вільні вікна", (instructor, car, days) -> {
-            List<ScheduleSlot> slots = scheduleSlotService.findFreeSlots(instructor, car, days);
+        // Левая колонка — работа со слотами
+        JPanel slotsPanel = new JPanel(new GridLayout(4, 1, 5, 5));
+        slotsPanel.setBorder(BorderFactory.createTitledBorder("Вікна"));
+        slotsPanel.add(createSlotsButton("Переглянути вільні вікна", (i, c, d) -> {
+            List<ScheduleSlot> slots = scheduleSlotService.findFreeSlots(i, c, d);
             freeSlotsPanel.refreshFreeSlots(slots);
             mainFrame.showPanel(PanelName.FREE_SLOTS_PANEL.name());
-        }), gbc);
-
-        gbc.gridy = 3;
-        add(createSlotsButton("Переглянути зайняті вікна", (instructor, car, days) -> {
-            List<ScheduleSlot> slots = scheduleSlotService.findBookedSlots(instructor, car, days);
+        }));
+        slotsPanel.add(createSlotsButton("Переглянути зайняті вікна", (i, c, d) -> {
+            List<ScheduleSlot> slots = scheduleSlotService.findBookedSlots(i, c, d);
             bookedSlotsPanel.refreshBookedSlots(slots);
             mainFrame.showPanel(PanelName.BOOKED_SLOTS_PANEL.name());
-        }), gbc);
-
-        gbc.gridy = 4;
-        add(createSlotsButton("Переглянути всі вікна", (instructor, car, days) -> {
-            List<ScheduleSlot> slots = scheduleSlotService.findAllSlots(instructor, car, days);
+        }));
+        slotsPanel.add(createSlotsButton("Переглянути всі вікна", (i, c, d) -> {
+            List<ScheduleSlot> slots = scheduleSlotService.findAllSlots(i, c, d);
             allSlotsPanel.refreshAllSlots(slots);
             mainFrame.showPanel(PanelName.ALL_SLOTS_PANEL.name());
-        }), gbc);
+        }));
+        slotsPanel.add(showInstructorsWeekends("Вихідні інструкторів"));
 
-        gbc.gridy = 5;
-        add(showInstructorsWeekends("Переглянути інструкторів та їхні вихідні"), gbc);
+        // Правая колонка — управление справочниками
+        JPanel managePanel = new JPanel(new GridLayout(5, 1, 5, 5));
+        managePanel.setBorder(BorderFactory.createTitledBorder("Справочники"));
+        managePanel.add(addInstructorButton("Додати / видалити інструктора"));
+        managePanel.add(addCarButton("Додати / видалити машину"));
+        managePanel.add(addWindowsForInstructorButton("Додати місця для інструктора"));
+        managePanel.add(addWindowsForCarButton("Додати місця для машини"));
+        managePanel.add(addFreeWindows("Додати вільні місця (всі)"));
 
-        gbc.gridy = 6;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(10, 5, 5, 5);
-        add(addInstructorButton("Додати або видалити інструктора"), gbc);
+        centerPanel.add(slotsPanel);
+        centerPanel.add(managePanel);
 
-        gbc.gridy = 7;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(10, 5, 5, 5);
-        add(addCarButton("Додати або видалити машину"), gbc);
+        add(centerPanel, BorderLayout.SOUTH);
 
-        // 👉 новая кнопка: добавление окон для инструктора
-        gbc.gridy = 8;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(10, 5, 5, 5);
-        add(addWindowsForInstructorButton("Додати вільні місця для інструктора"), gbc);
+        // Нижняя часть: выбор инструктора и машины
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBorder(BorderFactory.createTitledBorder("Вибір інструкторів і машин"));
+        bottomPanel.add(createInstructorCarButtonGrid(), BorderLayout.CENTER);
 
-        // 👉 новая кнопка: добавление окон для машины
-        gbc.gridy = 9;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(10, 5, 5, 5);
-        add(addWindowsForCarButton("Додати вільні місця для машини"), gbc);
-
-        gbc.gridy = 10;
-        gbc.insets = new Insets(20, 5, 5, 5);
-        add(addFreeWindows("Додати вільні місця для запису (всі)"), gbc);
+        add(bottomPanel, BorderLayout.CENTER);
 
         revalidate();
         repaint();
@@ -274,6 +253,11 @@ public class RangeSelectionPanel extends JPanel {
 
     private JButton addInstructorButton(String name) {
         JButton addInstructorBtn = new JButton(name);
+        addInstructorBtn.setBackground(new Color(220, 53, 69)); // bootstrap red
+        addInstructorBtn.setForeground(Color.WHITE);
+        addInstructorBtn.setFocusPainted(false);
+        addInstructorBtn.setOpaque(true);
+
         addInstructorBtn.addActionListener(e -> {
             AddInstructorDialog dialog = new AddInstructorDialog(
                     (JFrame) SwingUtilities.getWindowAncestor(this),
@@ -287,8 +271,13 @@ public class RangeSelectionPanel extends JPanel {
     }
 
     private JButton addCarButton(String name) {
-        JButton addInstructorBtn = new JButton(name);
-        addInstructorBtn.addActionListener(e -> {
+        JButton addCarBtn = new JButton(name);
+        addCarBtn.setBackground(new Color(220, 53, 69)); // bootstrap red
+        addCarBtn.setForeground(Color.WHITE);
+        addCarBtn.setFocusPainted(false);
+        addCarBtn.setOpaque(true);
+
+        addCarBtn.addActionListener(e -> {
             AddCarDialog dialog = new AddCarDialog(
                     (JFrame) SwingUtilities.getWindowAncestor(this),
                     carService
@@ -297,11 +286,15 @@ public class RangeSelectionPanel extends JPanel {
 
             buildUI();
         });
-        return addInstructorBtn;
+        return addCarBtn;
     }
 
     private JButton addWindowsForInstructorButton(String name) {
         JButton button = new JButton(name);
+        button.setBackground(new Color(40, 167, 69)); // bootstrap green
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setOpaque(true);
         button.addActionListener(e -> {
             AddWindowsForInstructorDialog dialog = new AddWindowsForInstructorDialog(
                     (JFrame) SwingUtilities.getWindowAncestor(this),
@@ -316,6 +309,10 @@ public class RangeSelectionPanel extends JPanel {
 
     private JButton addWindowsForCarButton(String name) {
         JButton button = new JButton(name);
+        button.setBackground(new Color(40, 167, 69)); // bootstrap green
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setOpaque(true);
         button.addActionListener(e -> {
             AddWindowsForCarDialog dialog = new AddWindowsForCarDialog(
                     (JFrame) SwingUtilities.getWindowAncestor(this),
