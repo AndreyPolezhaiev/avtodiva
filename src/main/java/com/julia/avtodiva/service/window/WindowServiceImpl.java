@@ -88,4 +88,76 @@ public class WindowServiceImpl implements WindowService {
             }
         }
     }
+
+//    @Override
+//    public void addFreeWindowsForInstructor(String instructorName, int days) {
+//        Instructor instructor = instructorRepository.findByName(instructorName)
+//                .orElseThrow(() -> new RuntimeException("Instructor not found"));
+//
+//        List<Car> allCars = carRepository.findAll();
+//        int[][] hours = {
+//                {8, 0}, {11, 30}, {15, 0}, {18, 30}
+//        };
+//
+//        for (int i = 0; i < days; i++) {
+//            LocalDate targetDate = LocalDate.now().plusDays(i);
+//            for (int j = 0; j < hours.length; j++) {
+//                LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
+//                LocalTime to = (j == 3) ? from.plusHours(2) : from.plusHours(3);
+//
+//                for (Car car : allCars) {
+//                    boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
+//                            targetDate, from, instructor, car
+//                    );
+//                    if (exists) continue;
+//
+//                    ScheduleSlot slot = new ScheduleSlot();
+//                    slot.setDate(targetDate);
+//                    slot.setTimeFrom(from);
+//                    slot.setTimeTo(to);
+//                    slot.setInstructor(instructor);
+//                    slot.setCar(car);
+//                    slot.setBooked(false);
+//
+//                    scheduleSlotRepository.save(slot);
+//                }
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public void addFreeWindowsForCar(String carName, int days) {
+//        Car car = carRepository.findByName(carName)
+//                .orElseThrow(() -> new RuntimeException("Car not found"));
+//
+//        List<Instructor> allInstructors = instructorRepository.findAll();
+//        int[][] hours = {
+//                {8, 0}, {11, 30}, {15, 0}, {18, 30}
+//        };
+//
+//        for (int i = 0; i < days; i++) {
+//            LocalDate targetDate = LocalDate.now().plusDays(i);
+//            for (int j = 0; j < hours.length; j++) {
+//                LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
+//                LocalTime to = (j == 3) ? from.plusHours(2) : from.plusHours(3);
+//
+//                for (Instructor instructor : allInstructors) {
+//                    boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
+//                            targetDate, from, instructor, car
+//                    );
+//                    if (exists) continue;
+//
+//                    ScheduleSlot slot = new ScheduleSlot();
+//                    slot.setDate(targetDate);
+//                    slot.setTimeFrom(from);
+//                    slot.setTimeTo(to);
+//                    slot.setInstructor(instructor);
+//                    slot.setCar(car);
+//                    slot.setBooked(false);
+//
+//                    scheduleSlotRepository.save(slot);
+//                }
+//            }
+//        }
+//    }
 }

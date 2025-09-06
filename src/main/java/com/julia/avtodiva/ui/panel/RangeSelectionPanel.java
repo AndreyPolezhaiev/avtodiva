@@ -2,6 +2,7 @@ package com.julia.avtodiva.ui.panel;
 
 import com.julia.avtodiva.model.Instructor;
 import com.julia.avtodiva.model.ScheduleSlot;
+import com.julia.avtodiva.service.car.CarService;
 import com.julia.avtodiva.service.instructor.InstructorService;
 import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.service.window.WindowService;
@@ -11,6 +12,8 @@ import com.julia.avtodiva.ui.panel.data.AllSlotsPanel;
 import com.julia.avtodiva.ui.panel.data.BookedSlotsPanel;
 import com.julia.avtodiva.ui.panel.data.FreeSlotsPanel;
 import com.julia.avtodiva.ui.panel.data.InstructorsPanel;
+import com.julia.avtodiva.ui.panel.dialog.AddCarDialog;
+import com.julia.avtodiva.ui.panel.dialog.AddInstructorDialog;
 import com.julia.avtodiva.ui.panel.dialog.AddWindowsDialog;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +27,13 @@ import java.util.List;
 
 @Component
 public class RangeSelectionPanel extends JPanel {
-    private final JTextField numberField;
-    private final JRadioButton daysButton;
+    private JTextField numberField;
+    private JRadioButton daysButton;
     private final MainFrame mainFrame;
     @Autowired
     private WindowService windowService;
     private final ScheduleSlotService scheduleSlotService;
+    private final CarService carService;
     private final AllSlotsPanel allSlotsPanel;
     private final FreeSlotsPanel freeSlotsPanel;
     private final BookedSlotsPanel bookedSlotsPanel;
@@ -42,7 +46,7 @@ public class RangeSelectionPanel extends JPanel {
 
     @Autowired
     public RangeSelectionPanel(@Lazy MainFrame mainFrame,
-                               ScheduleSlotService scheduleSlotService,
+                               ScheduleSlotService scheduleSlotService, CarService carService,
                                AllSlotsPanel allSlotsPanel,
                                FreeSlotsPanel freeSlotsPanel,
                                BookedSlotsPanel bookedSlotsPanel,
@@ -50,11 +54,18 @@ public class RangeSelectionPanel extends JPanel {
                                InstructorService instructorService) {
         this.mainFrame = mainFrame;
         this.scheduleSlotService = scheduleSlotService;
+        this.carService = carService;
         this.allSlotsPanel = allSlotsPanel;
         this.freeSlotsPanel = freeSlotsPanel;
         this.bookedSlotsPanel = bookedSlotsPanel;
         this.instructorsPanel = instructorsPanel;
         this.instructorService = instructorService;
+
+        buildUI();
+    }
+
+    private void buildUI() {
+        removeAll();
 
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -112,8 +123,21 @@ public class RangeSelectionPanel extends JPanel {
 
         gbc.gridy = 6;
         gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 5, 5, 5);
+        add(addInstructorButton("Додати або видалити інструктора"), gbc);
+
+        gbc.gridy = 7;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 5, 5, 5);
+        add(addCarButton("Додати або видалити машину"), gbc);
+
+        gbc.gridy = 8;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(20, 5, 5, 5);
         add(addFreeWindows("Додати вільні місця для запису"), gbc);
+
+        revalidate();
+        repaint();
     }
 
     @FunctionalInterface
@@ -191,11 +215,13 @@ public class RangeSelectionPanel extends JPanel {
     }
 
     private JPanel createInstructorCarButtonGrid() {
-        JPanel gridPanel = new JPanel(new GridLayout(AppState.INSTRUCTORS.length, 2, 10, 10));
+        JPanel gridPanel = new JPanel(new GridLayout(instructorService.getInstructorsNames().length, 2, 10, 10));
 
-        for (int i = 0; i < AppState.INSTRUCTORS.length; i++) {
-            if (i < AppState.INSTRUCTORS.length) {
-                JToggleButton b = new JToggleButton(AppState.INSTRUCTORS[i]);
+        for (int i = 0; i < instructorService.getInstructorsNames().length; i++) {
+            if (i < instructorService.getInstructorsNames().length) {
+                String instructorName = instructorService.getInstructorsNames()[i];
+                String instructorButtonName = instructorName.substring(0, 1).toUpperCase() + instructorName.substring(1);
+                JToggleButton b = new JToggleButton(instructorButtonName);
                 instructorButtons.add(b);
                 gridPanel.add(b);
             } else {
@@ -203,8 +229,10 @@ public class RangeSelectionPanel extends JPanel {
             }
 
             // Правая колонка — машины
-            if (i < AppState.CARS.length) {
-                JToggleButton b = new JToggleButton(AppState.CARS[i]);
+            if (i < carService.getCarsNames().length) {
+                String carName = carService.getCarsNames()[i];
+                String carButtonName = carName.substring(0, 1).toUpperCase() + carName.substring(1);
+                JToggleButton b = new JToggleButton(carButtonName);
                 carButtons.add(b);
                 gridPanel.add(b);
             } else {
@@ -214,7 +242,6 @@ public class RangeSelectionPanel extends JPanel {
 
         return gridPanel;
     }
-
 
     private JButton addFreeWindows(String name) {
         JButton addWindowButton = new JButton(name);
@@ -226,5 +253,33 @@ public class RangeSelectionPanel extends JPanel {
             dialog.setVisible(true);
         });
         return addWindowButton;
+    }
+
+    private JButton addInstructorButton(String name) {
+        JButton addInstructorBtn = new JButton(name);
+        addInstructorBtn.addActionListener(e -> {
+            AddInstructorDialog dialog = new AddInstructorDialog(
+                    (JFrame) SwingUtilities.getWindowAncestor(this),
+                    instructorService
+            );
+            dialog.setVisible(true);
+
+            buildUI();
+        });
+        return addInstructorBtn;
+    }
+
+    private JButton addCarButton(String name) {
+        JButton addInstructorBtn = new JButton(name);
+        addInstructorBtn.addActionListener(e -> {
+            AddCarDialog dialog = new AddCarDialog(
+                    (JFrame) SwingUtilities.getWindowAncestor(this),
+                    carService
+            );
+            dialog.setVisible(true);
+
+            buildUI();
+        });
+        return addInstructorBtn;
     }
 }

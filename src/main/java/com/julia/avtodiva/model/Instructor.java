@@ -33,4 +33,9 @@ public class Instructor {
     )
     @ToString.Exclude
     private List<Weekend> weekends = new ArrayList<>();
+
+    @OneToMany(mappedBy = "instructor",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<ScheduleSlot> slots = new ArrayList<>();
 }

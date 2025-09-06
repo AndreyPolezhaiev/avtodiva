@@ -11,4 +11,6 @@ public interface InstructorService {
     void saveAllInstructors(List<Instructor> list);
     Instructor findById(Long id);
     Instructor findByName(String name);
+    String[] getInstructorsNames();
+    void deleteByName(String name);
 }

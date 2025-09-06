@@ -4,6 +4,7 @@ import com.julia.avtodiva.model.Instructor;
 import com.julia.avtodiva.repository.InstructorRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,9 +20,15 @@ public class InstructorServiceImpl implements InstructorService {
 
     @Override
     public void saveInstructor(Instructor instructor) {
-        if (instructor != null) {
-            instructorRepository.save(instructor);
+        if (instructor == null || instructor.getName() == null || instructor.getName().isBlank()) {
+            throw new IllegalArgumentException("Ім'я інструктора не може бути порожнім!");
         }
+
+        if (instructorRepository.existsByNameIgnoreCase(instructor.getName())) {
+            throw new IllegalStateException("Інструктор з іменем '" + instructor.getName() + "' вже існує!");
+        }
+        instructor.setName(instructor.getName().toLowerCase());
+        instructorRepository.save(instructor);
     }
 
     @Override
@@ -41,5 +48,19 @@ public class InstructorServiceImpl implements InstructorService {
         return instructorRepository.findByName(name).orElseThrow(
                 () -> new RuntimeException("Can't find instructor by name: " + name)
         );
+    }
+
+    @Override
+    public String[] getInstructorsNames() {
+        return instructorRepository.findAll()
+                .stream()
+                .map(Instructor::getName)
+                .toArray(String[]::new);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByName(String name) {
+        instructorRepository.deleteByName(name);
     }
 }

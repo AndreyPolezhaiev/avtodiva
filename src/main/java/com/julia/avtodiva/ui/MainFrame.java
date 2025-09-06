@@ -29,11 +29,11 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
 
         mainPanel = new JPanel(cardLayout);
-        mainPanel.add(rangeSelectionPanel, PanelName.RANGE_SELECTION_PANEL.name());
-        mainPanel.add(freeSlotsPanel, PanelName.FREE_SLOTS_PANEL.name());
-        mainPanel.add(allSlotsPanel, PanelName.ALL_SLOTS_PANEL.name());
-        mainPanel.add(bookedSlotsPanel, PanelName.BOOKED_SLOTS_PANEL.name());
-        mainPanel.add(instructorsPanel, PanelName.INSTRUCTOR_WEEKEND_PANEL.name());
+        mainPanel.add(new JScrollPane(rangeSelectionPanel), PanelName.RANGE_SELECTION_PANEL.name());
+        mainPanel.add(new JScrollPane(freeSlotsPanel), PanelName.FREE_SLOTS_PANEL.name());
+        mainPanel.add(new JScrollPane(allSlotsPanel), PanelName.ALL_SLOTS_PANEL.name());
+        mainPanel.add(new JScrollPane(bookedSlotsPanel), PanelName.BOOKED_SLOTS_PANEL.name());
+        mainPanel.add(new JScrollPane(instructorsPanel), PanelName.INSTRUCTOR_WEEKEND_PANEL.name());
         add(mainPanel);
         showPanel(PanelName.RANGE_SELECTION_PANEL.name());
     }
