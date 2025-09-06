@@ -29,13 +29,26 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
 
         mainPanel = new JPanel(cardLayout);
-        mainPanel.add(new JScrollPane(rangeSelectionPanel), PanelName.RANGE_SELECTION_PANEL.name());
-        mainPanel.add(new JScrollPane(freeSlotsPanel), PanelName.FREE_SLOTS_PANEL.name());
-        mainPanel.add(new JScrollPane(allSlotsPanel), PanelName.ALL_SLOTS_PANEL.name());
-        mainPanel.add(new JScrollPane(bookedSlotsPanel), PanelName.BOOKED_SLOTS_PANEL.name());
-        mainPanel.add(new JScrollPane(instructorsPanel), PanelName.INSTRUCTOR_WEEKEND_PANEL.name());
+        JScrollPane rangeScroll = createScrollPane(rangeSelectionPanel);
+        JScrollPane freeScroll = createScrollPane(freeSlotsPanel);
+        JScrollPane allScroll = createScrollPane(allSlotsPanel);
+        JScrollPane bookedScroll = createScrollPane(bookedSlotsPanel);
+        JScrollPane instructorScroll = createScrollPane(instructorsPanel);
+
+        mainPanel.add(rangeScroll, PanelName.RANGE_SELECTION_PANEL.name());
+        mainPanel.add(freeScroll, PanelName.FREE_SLOTS_PANEL.name());
+        mainPanel.add(allScroll, PanelName.ALL_SLOTS_PANEL.name());
+        mainPanel.add(bookedScroll, PanelName.BOOKED_SLOTS_PANEL.name());
+        mainPanel.add(instructorScroll, PanelName.INSTRUCTOR_WEEKEND_PANEL.name());
         add(mainPanel);
         showPanel(PanelName.RANGE_SELECTION_PANEL.name());
+    }
+
+    private JScrollPane createScrollPane(JComponent comp) {
+        JScrollPane scrollPane = new JScrollPane(comp);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);   // скорость колёсика
+        scrollPane.getVerticalScrollBar().setBlockIncrement(50);  // PgUp/PgDn
+        return scrollPane;
     }
 
     public void showPanel(String name) {

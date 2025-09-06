@@ -12,9 +12,7 @@ import com.julia.avtodiva.ui.panel.data.AllSlotsPanel;
 import com.julia.avtodiva.ui.panel.data.BookedSlotsPanel;
 import com.julia.avtodiva.ui.panel.data.FreeSlotsPanel;
 import com.julia.avtodiva.ui.panel.data.InstructorsPanel;
-import com.julia.avtodiva.ui.panel.dialog.AddCarDialog;
-import com.julia.avtodiva.ui.panel.dialog.AddInstructorDialog;
-import com.julia.avtodiva.ui.panel.dialog.AddWindowsDialog;
+import com.julia.avtodiva.ui.panel.dialog.*;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -131,10 +129,21 @@ public class RangeSelectionPanel extends JPanel {
         gbc.insets = new Insets(10, 5, 5, 5);
         add(addCarButton("Додати або видалити машину"), gbc);
 
+        // 👉 новая кнопка: добавление окон для инструктора
         gbc.gridy = 8;
         gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 5, 5, 5);
+        add(addWindowsForInstructorButton("Додати вільні місця для інструктора"), gbc);
+
+        // 👉 новая кнопка: добавление окон для машины
+        gbc.gridy = 9;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 5, 5, 5);
+        add(addWindowsForCarButton("Додати вільні місця для машини"), gbc);
+
+        gbc.gridy = 10;
         gbc.insets = new Insets(20, 5, 5, 5);
-        add(addFreeWindows("Додати вільні місця для запису"), gbc);
+        add(addFreeWindows("Додати вільні місця для запису (всі)"), gbc);
 
         revalidate();
         repaint();
@@ -215,28 +224,36 @@ public class RangeSelectionPanel extends JPanel {
     }
 
     private JPanel createInstructorCarButtonGrid() {
-        JPanel gridPanel = new JPanel(new GridLayout(instructorService.getInstructorsNames().length, 2, 10, 10));
+        instructorButtons.clear();
+        carButtons.clear();
 
-        for (int i = 0; i < instructorService.getInstructorsNames().length; i++) {
-            if (i < instructorService.getInstructorsNames().length) {
+        int instructorCount = instructorService.getInstructorsNames().length;
+        int carCount = carService.getCarsNames().length;
+        int max = Math.max(instructorCount, carCount);
+
+        JPanel gridPanel = new JPanel(new GridLayout(max, 2, 10, 10));
+
+        for (int i = 0; i < max; i++) {
+            // Левая колонка — инструкторы
+            if (i < instructorCount) {
                 String instructorName = instructorService.getInstructorsNames()[i];
                 String instructorButtonName = instructorName.substring(0, 1).toUpperCase() + instructorName.substring(1);
                 JToggleButton b = new JToggleButton(instructorButtonName);
                 instructorButtons.add(b);
                 gridPanel.add(b);
             } else {
-                gridPanel.add(new JLabel("")); // заполнитель
+                gridPanel.add(new JLabel("")); // пустая ячейка
             }
 
             // Правая колонка — машины
-            if (i < carService.getCarsNames().length) {
+            if (i < carCount) {
                 String carName = carService.getCarsNames()[i];
                 String carButtonName = carName.substring(0, 1).toUpperCase() + carName.substring(1);
                 JToggleButton b = new JToggleButton(carButtonName);
                 carButtons.add(b);
                 gridPanel.add(b);
             } else {
-                gridPanel.add(new JLabel("")); // заполнитель
+                gridPanel.add(new JLabel("")); // пустая ячейка
             }
         }
 
@@ -282,4 +299,33 @@ public class RangeSelectionPanel extends JPanel {
         });
         return addInstructorBtn;
     }
+
+    private JButton addWindowsForInstructorButton(String name) {
+        JButton button = new JButton(name);
+        button.addActionListener(e -> {
+            AddWindowsForInstructorDialog dialog = new AddWindowsForInstructorDialog(
+                    (JFrame) SwingUtilities.getWindowAncestor(this),
+                    windowService,
+                    instructorService
+            );
+            dialog.setVisible(true);
+            buildUI(); // обновим панель после добавления
+        });
+        return button;
+    }
+
+    private JButton addWindowsForCarButton(String name) {
+        JButton button = new JButton(name);
+        button.addActionListener(e -> {
+            AddWindowsForCarDialog dialog = new AddWindowsForCarDialog(
+                    (JFrame) SwingUtilities.getWindowAncestor(this),
+                    windowService,
+                    carService
+            );
+            dialog.setVisible(true);
+            buildUI(); // обновим панель после добавления
+        });
+        return button;
+    }
+
 }
