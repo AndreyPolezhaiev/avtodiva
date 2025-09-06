@@ -241,6 +241,8 @@ public class RangeSelectionPanel extends JPanel {
 
     private JButton addFreeWindows(String name) {
         JButton addWindowButton = new JButton(name);
+        addWindowButton.setBackground(new Color(0, 100, 0)); // тёмно-зелёный
+        addWindowButton.setForeground(Color.WHITE);
         addWindowButton.addActionListener(e -> {
             AddWindowsDialog dialog = new AddWindowsDialog(
                     (JFrame) SwingUtilities.getWindowAncestor(this),
@@ -324,5 +326,6 @@ public class RangeSelectionPanel extends JPanel {
         });
         return button;
     }
+
 
 }
