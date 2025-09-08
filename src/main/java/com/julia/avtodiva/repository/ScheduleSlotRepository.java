@@ -3,6 +3,7 @@ package com.julia.avtodiva.repository;
 import com.julia.avtodiva.model.Car;
 import com.julia.avtodiva.model.Instructor;
 import com.julia.avtodiva.model.ScheduleSlot;
+import com.julia.avtodiva.model.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -121,4 +122,32 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
             @Param("timeTo") LocalTime timeTo,
             @Param("excludeId") Long excludeId
     );
+
+    @Query("""
+       SELECT s FROM ScheduleSlot s
+       WHERE LOWER(s.instructor.name) = LOWER(:instructorName)
+         AND LOWER(s.student.name) = LOWER(:studentName)
+       """)
+    List<ScheduleSlot> findByInstructorNameIgnoreCaseAndStudentNameIgnoreCase(
+            @Param("instructorName") String instructorName,
+            @Param("studentName") String studentName
+    );
+
+    @Query("""
+       SELECT s FROM ScheduleSlot s
+       WHERE LOWER(s.instructor.name) = LOWER(:instructorName)
+       """)
+    List<ScheduleSlot> findByInstructorNameIgnoreCase(
+            @Param("instructorName") String instructorName
+    );
+
+    @Query("""
+       SELECT s FROM ScheduleSlot s
+       WHERE LOWER(s.student.name) = LOWER(:studentName)
+       """)
+    List<ScheduleSlot> findByStudentNameIgnoreCase(
+            @Param("studentName") String studentName
+    );
+
+    boolean existsByStudent(Student student);
 }

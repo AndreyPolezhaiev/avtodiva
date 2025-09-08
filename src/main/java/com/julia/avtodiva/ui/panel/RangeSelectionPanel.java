@@ -5,13 +5,11 @@ import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.service.car.CarService;
 import com.julia.avtodiva.service.instructor.InstructorService;
 import com.julia.avtodiva.service.schedule.ScheduleSlotService;
+import com.julia.avtodiva.service.student.StudentService;
 import com.julia.avtodiva.service.window.WindowService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
-import com.julia.avtodiva.ui.panel.data.AllSlotsPanel;
-import com.julia.avtodiva.ui.panel.data.BookedSlotsPanel;
-import com.julia.avtodiva.ui.panel.data.FreeSlotsPanel;
-import com.julia.avtodiva.ui.panel.data.InstructorsPanel;
+import com.julia.avtodiva.ui.panel.data.*;
 import com.julia.avtodiva.ui.panel.dialog.*;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +33,12 @@ public class RangeSelectionPanel extends JPanel {
     private final AllSlotsPanel allSlotsPanel;
     private final FreeSlotsPanel freeSlotsPanel;
     private final BookedSlotsPanel bookedSlotsPanel;
+    private final SearchSlotsPanel searchSlotsPanel;
     private final InstructorsPanel instructorsPanel;
     @Autowired
     private final InstructorService instructorService;
+    @Autowired
+    private final StudentService studentService;
 
     private final List<JToggleButton> instructorButtons = new ArrayList<>();
     private final List<JToggleButton> carButtons = new ArrayList<>();
@@ -47,17 +48,19 @@ public class RangeSelectionPanel extends JPanel {
                                ScheduleSlotService scheduleSlotService, CarService carService,
                                AllSlotsPanel allSlotsPanel,
                                FreeSlotsPanel freeSlotsPanel,
-                               BookedSlotsPanel bookedSlotsPanel,
+                               BookedSlotsPanel bookedSlotsPanel, SearchSlotsPanel searchSlotsPanel,
                                InstructorsPanel instructorsPanel,
-                               InstructorService instructorService) {
+                               InstructorService instructorService, StudentService studentService) {
         this.mainFrame = mainFrame;
         this.scheduleSlotService = scheduleSlotService;
         this.carService = carService;
         this.allSlotsPanel = allSlotsPanel;
         this.freeSlotsPanel = freeSlotsPanel;
         this.bookedSlotsPanel = bookedSlotsPanel;
+        this.searchSlotsPanel = searchSlotsPanel;
         this.instructorsPanel = instructorsPanel;
         this.instructorService = instructorService;
+        this.studentService = studentService;
 
         buildUI();
     }
@@ -84,7 +87,7 @@ public class RangeSelectionPanel extends JPanel {
         JPanel centerPanel = new JPanel(new GridLayout(1, 2, 20, 0));
 
         // Левая колонка — работа со слотами
-        JPanel slotsPanel = new JPanel(new GridLayout(4, 1, 5, 5));
+        JPanel slotsPanel = new JPanel(new GridLayout(5, 1, 5, 5));
         slotsPanel.setBorder(BorderFactory.createTitledBorder("Вікна"));
         slotsPanel.add(createSlotsButton("Переглянути вільні вікна", (i, c, d) -> {
             List<ScheduleSlot> slots = scheduleSlotService.findFreeSlots(i, c, d);
@@ -102,6 +105,7 @@ public class RangeSelectionPanel extends JPanel {
             mainFrame.showPanel(PanelName.ALL_SLOTS_PANEL.name());
         }));
         slotsPanel.add(showInstructorsWeekends("Вихідні інструкторів"));
+        slotsPanel.add(showSearchPanelButton("Пошук за інструктором/ученицею"));
 
         // Правая колонка — управление справочниками
         JPanel managePanel = new JPanel(new GridLayout(5, 1, 5, 5));
@@ -131,6 +135,15 @@ public class RangeSelectionPanel extends JPanel {
     @FunctionalInterface
     private interface SlotAction {
         void run(List<String> instructors, List<String> cars, int days);
+    }
+
+    private JButton showSearchPanelButton(String name) {
+        JButton button = new JButton(name);
+        button.addActionListener(e -> {
+            searchSlotsPanel.refreshSearchSlots();
+            mainFrame.showPanel(PanelName.SEARCH_SLOTS_PANEL.name());
+        });
+        return button;
     }
 
     private JButton createSlotsButton(String name, SlotAction action) {

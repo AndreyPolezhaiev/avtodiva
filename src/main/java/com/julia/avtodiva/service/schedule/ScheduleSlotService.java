@@ -11,6 +11,8 @@ public interface ScheduleSlotService {
     List<ScheduleSlot> findBookedSlots(List<String> instructorNames, List<String> carNames, int daysAhead);
     List<ScheduleSlot> findFreeSlots(List<String> instructorNames, List<String> carNames, int daysAhead);
     void updateSlot(ScheduleSlot slot);
-    void saveAllSlots(List<ScheduleSlot> slots);
     public boolean rescheduleSlot(ScheduleSlot slot);
+    List<ScheduleSlot> findByInstructorAndStudentNames(String instructorName, String studentName);
+    List<ScheduleSlot> findByInstructorName(String instructorName);
+    List<ScheduleSlot> findByStudentName(String studentName);
 }

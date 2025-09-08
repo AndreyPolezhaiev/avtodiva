@@ -16,7 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScheduleSlotServiceImpl implements ScheduleSlotService {
     private final ScheduleSlotRepository scheduleSlotRepository;
-    private final StudentRepository studentRepository;
 
     @Override
     public List<ScheduleSlot> findAllSlots(List<String> instructorNames, List<String> carNames, int daysAhead) {
@@ -60,17 +59,6 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
     @Override
     public void updateSlot(ScheduleSlot slot) {
         scheduleSlotRepository.save(slot);
-    }
-
-    @Override
-    public void saveAllSlots(List<ScheduleSlot> slots) {
-        for (ScheduleSlot slot : slots) {
-            Student student = slot.getStudent();
-            if (student != null) {
-                studentRepository.save(student);
-            }
-        }
-        scheduleSlotRepository.saveAll(slots);
     }
 
     @Override
@@ -171,5 +159,20 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
             scheduleSlotRepository.save(created);
             return true;
         }
+    }
+
+    @Override
+    public List<ScheduleSlot> findByInstructorAndStudentNames(String instructorName, String studentName) {
+        return scheduleSlotRepository.findByInstructorNameIgnoreCaseAndStudentNameIgnoreCase(instructorName, studentName);
+    }
+
+    @Override
+    public List<ScheduleSlot> findByInstructorName(String instructorName) {
+        return scheduleSlotRepository.findByInstructorNameIgnoreCase(instructorName);
+    }
+
+    @Override
+    public List<ScheduleSlot> findByStudentName(String studentName) {
+        return scheduleSlotRepository.findByStudentNameIgnoreCase(studentName);
     }
 }
