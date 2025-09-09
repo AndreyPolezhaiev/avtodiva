@@ -45,8 +45,8 @@ public class AddWeekendDialog extends JDialog {
 
     private void buildUI() {
         dateSp = createDateSpinner(LocalDate.now(), zone);
-        fromSp = createTimeSpinner(LocalTime.of(9, 0), zone);
-        toSp   = createTimeSpinner(LocalTime.of(11, 0), zone);
+        fromSp = createTimeSpinner(LocalTime.of(7, 0), zone);
+        toSp   = createTimeSpinner(LocalTime.of(19, 0), zone);
 
         JPanel form = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();

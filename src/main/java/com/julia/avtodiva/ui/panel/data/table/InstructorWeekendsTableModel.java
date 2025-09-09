@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class InstructorWeekendsTableModel extends AbstractTableModel {
@@ -22,6 +23,12 @@ public class InstructorWeekendsTableModel extends AbstractTableModel {
         this.instructor = instructor;
         List<Weekend> src = instructor.getWeekends() != null ? instructor.getWeekends() : new ArrayList<>();
         this.weekends = new ArrayList<>(src);
+
+        this.weekends.sort(
+                Comparator.comparing(Weekend::getDay)
+                        .thenComparing(Weekend::getTimeFrom, Comparator.nullsLast(Comparator.naturalOrder()))
+        );
+
         this.selected = new ArrayList<>(weekends.size());
         for (int i = 0; i < weekends.size(); i++) selected.add(false);
     }
