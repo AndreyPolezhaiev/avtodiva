@@ -48,23 +48,46 @@ public class WindowServiceImpl implements WindowService {
         windowRepository.save(window);
     }
 
+    private int[][] getWorkingHours(String instructorName, LocalDate date) {
+        int[][] fullDay = {
+                {8, 0}, {11, 30}, {15, 0}, {18, 30}
+        };
+        int[][] afternoon = {
+                {15, 0}, {18, 30}
+        };
+
+        if ("Юлія".equalsIgnoreCase(instructorName)) {
+            return afternoon;
+        }
+
+        if ("Діна".equalsIgnoreCase(instructorName)) {
+            if (date.getDayOfWeek() == java.time.DayOfWeek.MONDAY) {
+                return fullDay;
+            } else {
+                return afternoon;
+            }
+        }
+
+        return fullDay;
+    }
+
     // Добавление всех новых окон для каждого инструктора со всеми машинами
     @Override
     public void addFreeWindowsForEachInstructor(int days) {
         List<Instructor> allInstructors = instructorRepository.findAll();
         List<Car> allCars = carRepository.findAll();
-        int[][] hours = {
-                {8, 0}, {11, 30}, {15, 0}, {18, 30}
-        };
 
          // 8:00 , 11:30, 15:00, 18:30 (2 часа)
         for (int i = 0; i < days; i++) {
             LocalDate targetDate = LocalDate.now().plusDays(i);
-            for (int j = 0; j < hours.length; j++) {
-                LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                LocalTime to = (j == 3) ? from.plusHours(2) : from.plusHours(3);
+            for (Instructor instructor : allInstructors) {
+                // выбираем рабочие часы в зависимости от инструктора и дня недели
+                int[][] hours = getWorkingHours(instructor.getName(), targetDate);
 
-                for (Instructor instructor : allInstructors) {
+                for (int j = 0; j < hours.length; j++) {
+                    LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
+                    LocalTime to = (j == hours.length - 1) ? from.plusHours(2) : from.plusHours(3);
+
                     for (Car car : allCars) {
                         boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
                                 targetDate, from, instructor, car
@@ -95,15 +118,14 @@ public class WindowServiceImpl implements WindowService {
                 .orElseThrow(() -> new RuntimeException("Instructor not found"));
 
         List<Car> allCars = carRepository.findAll();
-        int[][] hours = {
-                {8, 0}, {11, 30}, {15, 0}, {18, 30}
-        };
 
         for (int i = 0; i < days; i++) {
             LocalDate targetDate = LocalDate.now().plusDays(i);
+            int[][] hours = getWorkingHours(instructor.getName(), targetDate);
+
             for (int j = 0; j < hours.length; j++) {
                 LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                LocalTime to = (j == 3) ? from.plusHours(2) : from.plusHours(3);
+                LocalTime to = (j == hours.length - 1) ? from.plusHours(2) : from.plusHours(3);
 
                 for (Car car : allCars) {
                     boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
@@ -131,17 +153,17 @@ public class WindowServiceImpl implements WindowService {
                 .orElseThrow(() -> new RuntimeException("Car not found"));
 
         List<Instructor> allInstructors = instructorRepository.findAll();
-        int[][] hours = {
-                {8, 0}, {11, 30}, {15, 0}, {18, 30}
-        };
 
         for (int i = 0; i < days; i++) {
             LocalDate targetDate = LocalDate.now().plusDays(i);
-            for (int j = 0; j < hours.length; j++) {
-                LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                LocalTime to = (j == 3) ? from.plusHours(2) : from.plusHours(3);
+            for (Instructor instructor : allInstructors) {
+                // учитываем график инструктора
+                int[][] hours = getWorkingHours(instructor.getName(), targetDate);
 
-                for (Instructor instructor : allInstructors) {
+                for (int j = 0; j < hours.length; j++) {
+                    LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
+                    LocalTime to = (j == hours.length - 1) ? from.plusHours(2) : from.plusHours(3);
+
                     boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
                             targetDate, from, instructor, car
                     );
