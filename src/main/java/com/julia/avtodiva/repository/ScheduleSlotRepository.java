@@ -59,6 +59,14 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
                     AND s2.timeFrom < s.timeTo
                     AND s2.timeTo > s.timeFrom
               )
+              AND NOT EXISTS (
+                            SELECT s3 FROM ScheduleSlot s3
+                            WHERE s3.instructor = s.instructor
+                              AND s3.date = s.date
+                              AND s3.booked = true
+                              AND s3.timeFrom < s.timeTo
+                              AND s3.timeTo > s.timeFrom
+              )
             """)
     List<ScheduleSlot> findFreeSlotsBetween(
             @Param("instructorNames") List<String> instructorNames,
