@@ -7,9 +7,9 @@ import java.time.LocalTime;
 import java.util.List;
 
 public interface ScheduleSlotService {
-    List<ScheduleSlot> findAllSlots(List<String> instructorNames, List<String> carNames, int daysAhead);
-    List<ScheduleSlot> findBookedSlots(List<String> instructorNames, List<String> carNames, int daysAhead);
-    List<ScheduleSlot> findFreeSlots(List<String> instructorNames, List<String> carNames, int daysAhead);
+    List<ScheduleSlot> findAllSlots(List<String> instructorNames, List<String> carNames, LocalDate start, LocalDate end);
+    List<ScheduleSlot> findBookedSlots(List<String> instructorNames, List<String> carNames, LocalDate start, LocalDate end);
+    List<ScheduleSlot> findFreeSlots(List<String> instructorNames, List<String> carNames, LocalDate start, LocalDate end);
     void updateSlot(ScheduleSlot slot);
     public boolean rescheduleSlot(ScheduleSlot slot);
     List<ScheduleSlot> findByInstructorAndStudentNames(String instructorName, String studentName);

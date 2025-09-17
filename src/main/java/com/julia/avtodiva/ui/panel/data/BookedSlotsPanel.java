@@ -143,7 +143,8 @@ public class BookedSlotsPanel extends JPanel {
             List<ScheduleSlot> updatedSlots = scheduleSlotService.findBookedSlots(
                     AppState.instructorNames,
                     AppState.carNames,
-                    AppState.daysAhead
+                    AppState.startDate,
+                    AppState.endDate
             );
             refreshBookedSlots(updatedSlots);
         });
@@ -228,7 +229,10 @@ public class BookedSlotsPanel extends JPanel {
             }
 
             List<ScheduleSlot> updatedSlots = scheduleSlotService.findBookedSlots(
-                    AppState.instructorNames, AppState.carNames, AppState.daysAhead
+                    AppState.instructorNames,
+                    AppState.carNames,
+                    AppState.startDate,
+                    AppState.endDate
             );
             refreshBookedSlots(updatedSlots);
         });

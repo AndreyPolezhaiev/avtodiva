@@ -144,7 +144,8 @@ public class FreeSlotsPanel extends JPanel {
             List<ScheduleSlot> updatedSlots = scheduleSlotService.findFreeSlots(
                     AppState.instructorNames,
                     AppState.carNames,
-                    AppState.daysAhead
+                    AppState.startDate,
+                    AppState.endDate
             );
             refreshFreeSlots(updatedSlots);
         });

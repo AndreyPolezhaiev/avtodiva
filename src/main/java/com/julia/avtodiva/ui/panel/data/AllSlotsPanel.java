@@ -158,7 +158,10 @@ public class AllSlotsPanel extends JPanel {
             }
 
             List<ScheduleSlot> updatedSlots = scheduleSlotService.findAllSlots(
-                    AppState.instructorNames, AppState.carNames, AppState.daysAhead
+                    AppState.instructorNames,
+                    AppState.carNames,
+                    AppState.startDate,
+                    AppState.endDate
             );
             refreshAllSlots(updatedSlots);
         });
@@ -231,7 +234,10 @@ public class AllSlotsPanel extends JPanel {
             }
 
             List<ScheduleSlot> updatedSlots = scheduleSlotService.findAllSlots(
-                    AppState.instructorNames, AppState.carNames, AppState.daysAhead
+                    AppState.instructorNames,
+                    AppState.carNames,
+                    AppState.startDate,
+                    AppState.endDate
             );
             refreshAllSlots(updatedSlots);
         });

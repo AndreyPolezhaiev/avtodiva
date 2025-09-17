@@ -12,19 +12,21 @@ import com.julia.avtodiva.ui.model.PanelName;
 import com.julia.avtodiva.ui.panel.data.*;
 import com.julia.avtodiva.ui.panel.dialog.*;
 import com.julia.avtodiva.ui.state.AppState;
+import org.jdesktop.swingx.JXDatePicker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class RangeSelectionPanel extends JPanel {
-    private JTextField numberField;
-    private JRadioButton daysButton;
     private final MainFrame mainFrame;
     @Autowired
     private WindowService windowService;
@@ -42,6 +44,9 @@ public class RangeSelectionPanel extends JPanel {
 
     private final List<JToggleButton> instructorButtons = new ArrayList<>();
     private final List<JToggleButton> carButtons = new ArrayList<>();
+
+    private JXDatePicker startDatePicker;
+    private JXDatePicker endDatePicker;
 
     @Autowired
     public RangeSelectionPanel(@Lazy MainFrame mainFrame,
@@ -70,16 +75,19 @@ public class RangeSelectionPanel extends JPanel {
         setLayout(new BorderLayout(10, 10));
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        topPanel.add(new JLabel("Переглянути вікна на"));
-        numberField = new JTextField(5);
-        topPanel.add(numberField);
-        daysButton = new JRadioButton("днів", true);
-        JRadioButton weeksButton = new JRadioButton("тижнів");
-        ButtonGroup group = new ButtonGroup();
-        group.add(daysButton);
-        group.add(weeksButton);
-        topPanel.add(daysButton);
-        topPanel.add(weeksButton);
+        topPanel.add(new JLabel("Період:"));
+
+        startDatePicker = new JXDatePicker();
+        startDatePicker.setFormats("dd.MM.yyyy");
+        startDatePicker.setDate(Date.valueOf(LocalDate.now()));
+        topPanel.add(startDatePicker);
+
+        topPanel.add(new JLabel("—"));
+
+        endDatePicker = new JXDatePicker();
+        endDatePicker.setFormats("dd.MM.yyyy");
+        endDatePicker.setDate(Date.valueOf(LocalDate.now().plusDays(7)));
+        topPanel.add(endDatePicker);
 
         add(topPanel, BorderLayout.NORTH);
 
@@ -89,18 +97,18 @@ public class RangeSelectionPanel extends JPanel {
         // Левая колонка — работа со слотами
         JPanel slotsPanel = new JPanel(new GridLayout(5, 1, 5, 5));
         slotsPanel.setBorder(BorderFactory.createTitledBorder("Вікна"));
-        slotsPanel.add(createSlotsButton("Переглянути вільні вікна", (i, c, d) -> {
-            List<ScheduleSlot> slots = scheduleSlotService.findFreeSlots(i, c, d);
+        slotsPanel.add(createSlotsButton("Переглянути вільні вікна", (i, c, start, end) -> {
+            List<ScheduleSlot> slots = scheduleSlotService.findFreeSlots(i, c, start, end);
             freeSlotsPanel.refreshFreeSlots(slots);
             mainFrame.showPanel(PanelName.FREE_SLOTS_PANEL.name());
         }));
-        slotsPanel.add(createSlotsButton("Переглянути зайняті вікна", (i, c, d) -> {
-            List<ScheduleSlot> slots = scheduleSlotService.findBookedSlots(i, c, d);
+        slotsPanel.add(createSlotsButton("Переглянути зайняті вікна", (i, c, start, end) -> {
+            List<ScheduleSlot> slots = scheduleSlotService.findBookedSlots(i, c, start, end);
             bookedSlotsPanel.refreshBookedSlots(slots);
             mainFrame.showPanel(PanelName.BOOKED_SLOTS_PANEL.name());
         }));
-        slotsPanel.add(createSlotsButton("Переглянути всі вікна", (i, c, d) -> {
-            List<ScheduleSlot> slots = scheduleSlotService.findAllSlots(i, c, d);
+        slotsPanel.add(createSlotsButton("Переглянути всі вікна", (i, c, start, end) -> {
+            List<ScheduleSlot> slots = scheduleSlotService.findAllSlots(i, c, start, end);
             allSlotsPanel.refreshAllSlots(slots);
             mainFrame.showPanel(PanelName.ALL_SLOTS_PANEL.name());
         }));
@@ -134,7 +142,7 @@ public class RangeSelectionPanel extends JPanel {
 
     @FunctionalInterface
     private interface SlotAction {
-        void run(List<String> instructors, List<String> cars, int days);
+        void run(List<String> instructors, List<String> cars, LocalDate start, LocalDate end);
     }
 
     private JButton showSearchPanelButton(String name) {
@@ -150,8 +158,10 @@ public class RangeSelectionPanel extends JPanel {
         JButton button = new JButton(name);
         button.addActionListener(e -> {
             try {
-                int value = Integer.parseInt(numberField.getText().trim());
-                if (value <= 0) throw new NumberFormatException();
+                LocalDate start = startDatePicker.getDate()
+                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate end = endDatePicker.getDate()
+                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
                 List<String> selectedInstructors = instructorButtons.stream()
                         .filter(AbstractButton::isSelected)
@@ -171,17 +181,25 @@ public class RangeSelectionPanel extends JPanel {
                     return;
                 }
 
-                AppState.daysAhead = daysButton.isSelected() ? value : value * 7;
+                if (end.isBefore(start)) {
+                    JOptionPane.showMessageDialog(this,
+                            "Дата завершення не може бути раніше дати початку.",
+                            "Помилка вибору дат",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
+                AppState.startDate = start;
+                AppState.endDate = end;
                 AppState.instructorNames = selectedInstructors;
                 AppState.carNames = selectedCars;
 
-                action.run(selectedInstructors, selectedCars, AppState.daysAhead);
+                action.run(selectedInstructors, selectedCars, start, end);
 
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this,
-                        "Введіть коректне позитивне число.",
-                        "Помилка вводу",
+                        "Помилка при виборі дат: " + ex.getMessage(),
+                        "Помилка",
                         JOptionPane.ERROR_MESSAGE);
             }
         });

@@ -3,12 +3,14 @@ package com.julia.avtodiva.ui.state;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
 @Data
 public class AppState {
-    public static int daysAhead = 7;
+    public static LocalDate startDate;
+    public static LocalDate endDate;
     public static List<String> instructorNames;
     public static List<String> carNames;
     public static String[] COLUMNS = {"✓", "Дата", "Інструктор", "Машина", "Час з", "Час до", "Учениця", "Опис", "Посилання"};

@@ -18,42 +18,33 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
     private final ScheduleSlotRepository scheduleSlotRepository;
 
     @Override
-    public List<ScheduleSlot> findAllSlots(List<String> instructorNames, List<String> carNames, int daysAhead) {
-        LocalDate today = LocalDate.now();
-        LocalDate endDate = today.plusDays(daysAhead);
-
+    public List<ScheduleSlot> findAllSlots(List<String> instructorNames, List<String> carNames, LocalDate start, LocalDate end) {
         List<String> instructors = instructorNames == null ? List.of() :
                 instructorNames.stream().map(String::toLowerCase).toList();
         List<String> cars = carNames == null ? List.of() :
                 carNames.stream().map(String::toLowerCase).toList();
 
-        return scheduleSlotRepository.findAllSlots(instructors, cars, today, endDate);
+        return scheduleSlotRepository.findAllSlots(instructors, cars, start, end);
     }
 
     @Override
-    public List<ScheduleSlot> findBookedSlots(List<String> instructorNames, List<String> carNames, int daysAhead) {
-        LocalDate today = LocalDate.now();
-        LocalDate endDate = today.plusDays(daysAhead);
-
+    public List<ScheduleSlot> findBookedSlots(List<String> instructorNames, List<String> carNames, LocalDate start, LocalDate end) {
         List<String> instructors = instructorNames == null ? List.of() :
                 instructorNames.stream().map(String::toLowerCase).toList();
         List<String> cars = carNames == null ? List.of() :
                 carNames.stream().map(String::toLowerCase).toList();
 
-        return scheduleSlotRepository.findBookedSlotsBetween(instructors, cars, today, endDate);
+        return scheduleSlotRepository.findBookedSlotsBetween(instructors, cars, start, end);
     }
 
     @Override
-    public List<ScheduleSlot> findFreeSlots(List<String> instructorNames, List<String> carNames, int daysAhead) {
-        LocalDate today = LocalDate.now();
-        LocalDate endDate = today.plusDays(daysAhead);
-
+    public List<ScheduleSlot> findFreeSlots(List<String> instructorNames, List<String> carNames, LocalDate start, LocalDate end) {
         List<String> instructors = instructorNames == null ? List.of() :
                 instructorNames.stream().map(String::toLowerCase).toList();
         List<String> cars = carNames == null ? List.of() :
                 carNames.stream().map(String::toLowerCase).toList();
 
-        return scheduleSlotRepository.findFreeSlotsBetween(instructors, cars, today, endDate);
+        return scheduleSlotRepository.findFreeSlotsBetween(instructors, cars, start, end);
     }
 
     @Override
