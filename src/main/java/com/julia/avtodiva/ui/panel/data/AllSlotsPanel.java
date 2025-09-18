@@ -6,6 +6,7 @@ import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
 import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
+import com.julia.avtodiva.ui.panel.data.table.BookedSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.renderer.LocalDateRenderer;
@@ -53,11 +54,33 @@ public class AllSlotsPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(table);
 
+        add(buildTopPanel(tableModel), BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         add(createBottomPanel(tableModel, table), BorderLayout.SOUTH);
 
         revalidate();
         repaint();
+    }
+
+    private JPanel buildTopPanel(AllSlotsTableModel tableModel) {
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        JToggleButton selectAllSlots = selectAllSlotsButton("Вибрати всі", tableModel);
+
+        topPanel.add(selectAllSlots);
+
+        return topPanel;
+    }
+
+    private JToggleButton selectAllSlotsButton(String name, AllSlotsTableModel tableModel) {
+        JToggleButton button = new JToggleButton(name);
+
+        button.addActionListener(e -> {
+            boolean selectAll = button.isSelected();
+            tableModel.selectAll(selectAll);
+        });
+
+        return button;
     }
 
     private void addStudentClickListener(JTable table, AllSlotsTableModel tableModel) {

@@ -175,4 +175,11 @@ public class FreeSlotsTableModel extends AbstractTableModel {
         }
         return result;
     }
+
+    public void selectAll(boolean select) {
+        for (int i = 0; i < slots.size(); i++) {
+            selected.set(i, select);
+        }
+        fireTableDataChanged();
+    }
 }
