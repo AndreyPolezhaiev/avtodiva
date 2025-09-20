@@ -4,12 +4,14 @@ import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.model.Student;
 import com.julia.avtodiva.repository.ScheduleSlotRepository;
 import com.julia.avtodiva.repository.StudentRepository;
+import com.julia.avtodiva.service.window.WorkingHoursProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -24,7 +26,19 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
         List<String> cars = carNames == null ? List.of() :
                 carNames.stream().map(String::toLowerCase).toList();
 
-        return scheduleSlotRepository.findAllSlots(instructors, cars, start, end);
+        List<ScheduleSlot> allSlotsFromRepo = scheduleSlotRepository.findAllSlots(instructors, cars, start, end);
+
+        return allSlotsFromRepo.stream()
+                .filter(slot -> {
+                    int[][] workingHours = WorkingHoursProvider.getWorkingHours(
+                            slot.getInstructor().getName(),
+                            slot.getDate()
+                    );
+                    return Arrays.stream(workingHours)
+                            .anyMatch(time -> slot.getTimeFrom().getHour() == time[0]
+                                    && slot.getTimeFrom().getMinute() == time[1]);
+                })
+                .toList();
     }
 
     @Override
@@ -44,7 +58,19 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
         List<String> cars = carNames == null ? List.of() :
                 carNames.stream().map(String::toLowerCase).toList();
 
-        return scheduleSlotRepository.findFreeSlotsBetween(instructors, cars, start, end);
+        List<ScheduleSlot> freeSlotsFromRepo = scheduleSlotRepository.findFreeSlotsBetween(instructors, cars, start, end);
+
+        return freeSlotsFromRepo.stream()
+                .filter(slot -> {
+                    int[][] workingHours = WorkingHoursProvider.getWorkingHours(
+                            slot.getInstructor().getName(),
+                            slot.getDate()
+                    );
+                    return Arrays.stream(workingHours)
+                            .anyMatch(time -> slot.getTimeFrom().getHour() == time[0]
+                                    && slot.getTimeFrom().getMinute() == time[1]);
+                })
+                .toList();
     }
 
     @Override

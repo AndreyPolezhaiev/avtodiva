@@ -6,6 +6,8 @@ import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class SlotDetailsDialog extends JDialog {
     private final boolean editable;
@@ -60,8 +62,9 @@ public class SlotDetailsDialog extends JDialog {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
 
-        form.add(new JLabel("Дата: " + slot.getDate()), gbc);
+        form.add(new JLabel("Дата: " + (slot.getDate() != null ? slot.getDate().format(formatter) : "")), gbc);
         gbc.gridy++;
         form.add(new JLabel("Інструктор: " + slot.getInstructor().getName()), gbc);
         gbc.gridy++;
@@ -132,8 +135,10 @@ public class SlotDetailsDialog extends JDialog {
     }
 
     private void onCopy() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
+
         StringBuilder sb = new StringBuilder();
-        sb.append("📅 Дата: ").append(slot.getDate()).append("\n");
+        sb.append("📅 Дата: ").append(slot.getDate() != null ? slot.getDate().format(formatter) : "").append("\n");
         sb.append("⏰ Час: ").append(slot.getTimeFrom()).append(" - ").append(slot.getTimeTo()).append("\n");
         sb.append("🚗 Машина: ").append(slot.getCar().getName()).append("\n");
         sb.append("👩‍🏫 Інструктор: ").append(slot.getInstructor().getName()).append("\n");

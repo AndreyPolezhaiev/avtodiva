@@ -18,7 +18,9 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Component
 public class FreeSlotsPanel extends JPanel {
@@ -195,9 +197,13 @@ public class FreeSlotsPanel extends JPanel {
             }
 
             StringBuilder sb = new StringBuilder();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
             for (ScheduleSlot slot : selectedSlots) {
-                // колонки 1,2,3,4 → дата, інструктор, машина, час з
-                sb.append(slot.getDate()).append("\t")
+                String formattedDate = slot.getDate() != null
+                        ? slot.getDate().format(formatter)
+                        : "";
+
+                sb.append(formattedDate).append("\t")
                         .append(slot.getInstructor().getName()).append("\t")
                         .append(slot.getCar().getName()).append("\t")
                         .append(slot.getTimeFrom() != null ? slot.getTimeFrom() : "")
