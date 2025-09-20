@@ -158,4 +158,11 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
     );
 
     boolean existsByStudent(Student student);
+
+    @Query("""
+       SELECT MAX(s.date)
+       FROM ScheduleSlot s
+       WHERE s.instructor = :instructor
+       """)
+    LocalDate findMaxDateByInstructor(@Param("instructor") Instructor instructor);
 }

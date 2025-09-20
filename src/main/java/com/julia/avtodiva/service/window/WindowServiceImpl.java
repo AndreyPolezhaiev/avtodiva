@@ -49,22 +49,53 @@ public class WindowServiceImpl implements WindowService {
         windowRepository.save(window);
     }
 
+    private int[][] getWorkingHours(String instructorName, LocalDate date) {
+        int[][] fullDay = {
+                {8, 0}, {11, 30}, {15, 0}
+        };
+        int[][] afternoon = {
+                {15, 0}, {18, 15}
+        };
+        int[][] upWork = {
+                {8, 0}, {11, 30}, {15, 0}, {18, 15}
+        };
+
+        if ("Юлія".equalsIgnoreCase(instructorName)) {
+            return afternoon;
+        }
+
+        if ("Діна".equalsIgnoreCase(instructorName)) {
+            if (date.getDayOfWeek() == DayOfWeek.MONDAY) {
+                return upWork;
+            }
+            else if (date.getDayOfWeek() == DayOfWeek.SATURDAY) {
+                return new int[][] {{16, 0}};
+            }
+            else {
+                return afternoon;
+            }
+        }
+
+        return fullDay;
+    }
+
     // Добавление всех новых окон для каждого инструктора со всеми машинами
     @Override
     public void addFreeWindowsForEachInstructor(int days) {
         List<Instructor> allInstructors = instructorRepository.findAll();
         List<Car> allCars = carRepository.findAll();
 
-         // 8:00 , 11:30, 15:00, 18:30 (2 часа)
-        for (int i = 0; i < days; i++) {
-            LocalDate targetDate = LocalDate.now().plusDays(i);
-            for (Instructor instructor : allInstructors) {
-                // выбираем рабочие часы в зависимости от инструктора и дня недели
-                int[][] hours = WorkingHoursProvider.getWorkingHours(instructor.getName(), targetDate);
+        for (Instructor instructor : allInstructors) {
+            LocalDate lastDate = scheduleSlotRepository.findMaxDateByInstructor(instructor);
+            LocalDate startDate = lastDate != null ? lastDate.plusDays(1) : LocalDate.now();
+
+            for (int i = 0; i < days; i++) {
+                LocalDate targetDate = startDate.plusDays(i);
+                int[][] hours = getWorkingHours(instructor.getName(), targetDate);
 
                 for (int j = 0; j < hours.length; j++) {
                     LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                    LocalTime to = (j == hours.length - 1) ? from.plusHours(2) : from.plusHours(3);
+                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 18) ? from.plusHours(2) : from.plusHours(3);
 
                     for (Car car : allCars) {
                         boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
@@ -97,13 +128,16 @@ public class WindowServiceImpl implements WindowService {
 
         List<Car> allCars = carRepository.findAll();
 
+        LocalDate lastDate = scheduleSlotRepository.findMaxDateByInstructor(instructor);
+        LocalDate startDate = lastDate != null ? lastDate.plusDays(1) : LocalDate.now();
+
         for (int i = 0; i < days; i++) {
-            LocalDate targetDate = LocalDate.now().plusDays(i);
-            int[][] hours = WorkingHoursProvider.getWorkingHours(instructor.getName(), targetDate);
+            LocalDate targetDate = startDate.plusDays(i);
+            int[][] hours = getWorkingHours(instructor.getName(), targetDate);
 
             for (int j = 0; j < hours.length; j++) {
                 LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                LocalTime to = (j == hours.length - 1) ? from.plusHours(2) : from.plusHours(3);
+                LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 18) ? from.plusHours(2) : from.plusHours(3);
 
                 for (Car car : allCars) {
                     boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
@@ -132,15 +166,20 @@ public class WindowServiceImpl implements WindowService {
 
         List<Instructor> allInstructors = instructorRepository.findAll();
 
-        for (int i = 0; i < days; i++) {
-            LocalDate targetDate = LocalDate.now().plusDays(i);
-            for (Instructor instructor : allInstructors) {
-                // учитываем график инструктора
-                int[][] hours = WorkingHoursProvider.getWorkingHours(instructor.getName(), targetDate);
+        for (Instructor instructor : allInstructors) {
+            // стартуем с даты последнего слота у этого инструктора (важно!)
+            LocalDate lastDate = scheduleSlotRepository.findMaxDateByInstructor(instructor);
+            LocalDate startDate = lastDate != null ? lastDate.plusDays(1) : LocalDate.now();
+
+            for (int i = 0; i < days; i++) {
+                LocalDate targetDate = startDate.plusDays(i);
+                int[][] hours = getWorkingHours(instructor.getName(), targetDate);
 
                 for (int j = 0; j < hours.length; j++) {
                     LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                    LocalTime to = (j == hours.length - 1) ? from.plusHours(2) : from.plusHours(3);
+                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 18)
+                            ? from.plusHours(2)
+                            : from.plusHours(3);
 
                     boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
                             targetDate, from, instructor, car

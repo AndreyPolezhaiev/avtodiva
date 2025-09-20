@@ -24,9 +24,6 @@ public class WorkingHoursProvider {
             if (date.getDayOfWeek() == DayOfWeek.MONDAY) {
                 return upWork;
             }
-            else if (date.getDayOfWeek() == DayOfWeek.SATURDAY) {
-                return new int[][] {{16, 0}};
-            }
             else {
                 return afternoon;
             }

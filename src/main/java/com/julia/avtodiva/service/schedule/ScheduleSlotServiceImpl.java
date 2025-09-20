@@ -28,17 +28,7 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
 
         List<ScheduleSlot> allSlotsFromRepo = scheduleSlotRepository.findAllSlots(instructors, cars, start, end);
 
-        return allSlotsFromRepo.stream()
-                .filter(slot -> {
-                    int[][] workingHours = WorkingHoursProvider.getWorkingHours(
-                            slot.getInstructor().getName(),
-                            slot.getDate()
-                    );
-                    return Arrays.stream(workingHours)
-                            .anyMatch(time -> slot.getTimeFrom().getHour() == time[0]
-                                    && slot.getTimeFrom().getMinute() == time[1]);
-                })
-                .toList();
+        return allSlotsFromRepo;
     }
 
     @Override
@@ -60,17 +50,7 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
 
         List<ScheduleSlot> freeSlotsFromRepo = scheduleSlotRepository.findFreeSlotsBetween(instructors, cars, start, end);
 
-        return freeSlotsFromRepo.stream()
-                .filter(slot -> {
-                    int[][] workingHours = WorkingHoursProvider.getWorkingHours(
-                            slot.getInstructor().getName(),
-                            slot.getDate()
-                    );
-                    return Arrays.stream(workingHours)
-                            .anyMatch(time -> slot.getTimeFrom().getHour() == time[0]
-                                    && slot.getTimeFrom().getMinute() == time[1]);
-                })
-                .toList();
+        return freeSlotsFromRepo;
     }
 
     @Override
