@@ -15,4 +15,5 @@ public interface ScheduleSlotService {
     List<ScheduleSlot> findByInstructorAndStudentNames(String instructorName, String studentName);
     List<ScheduleSlot> findByInstructorName(String instructorName);
     List<ScheduleSlot> findByStudentName(String studentName);
+    List<ScheduleSlot> filterSlotsByTime(List<ScheduleSlot> slots, List<String> selectedTimes);
 }

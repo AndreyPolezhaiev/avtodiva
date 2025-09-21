@@ -131,13 +131,13 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
             scheduleSlotRepository.save(target);
             return true;
         } else {
-            // проверка: у машины не должно быть других занятых слотов в это время
+
             if (scheduleSlotRepository.existsBookedCarConflictExcluding(
                     slot.getCar(),
                     slot.getDate(),
                     slot.getTimeFrom(),
                     slot.getTimeTo(),
-                    target.getId() // исключаем сам slot, иначе он всегда даст конфликт
+                    target.getId()
             )) {
                 throw new IllegalStateException("Ця машина вже зайнята у цей час!");
             }
@@ -171,5 +171,12 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
     @Override
     public List<ScheduleSlot> findByStudentName(String studentName) {
         return scheduleSlotRepository.findByStudentNameIgnoreCase(studentName);
+    }
+
+    @Override
+    public List<ScheduleSlot> filterSlotsByTime(List<ScheduleSlot> slots, List<String> selectedTimes) {
+        return slots.stream()
+                .filter(slot -> selectedTimes.contains(slot.getTimeFrom().toString()))
+                .toList();
     }
 }
