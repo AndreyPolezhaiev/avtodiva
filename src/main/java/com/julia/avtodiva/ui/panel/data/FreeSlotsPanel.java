@@ -10,6 +10,7 @@ import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.renderer.LocalDateRenderer;
 import com.julia.avtodiva.ui.panel.dialog.SlotDetailsDialog;
 import com.julia.avtodiva.ui.state.AppState;
+import com.julia.avtodiva.ui.util.CheckBoxComboBox;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -26,6 +28,8 @@ import java.util.Locale;
 public class FreeSlotsPanel extends JPanel {
     private final MainFrame mainFrame;
     private final ScheduleSlotService scheduleSlotService;
+
+    private final List<String> selectedTimes = new ArrayList<>();
 
     public FreeSlotsPanel(@Lazy MainFrame mainFrame, ScheduleSlotService scheduleSlotService) {
         this.mainFrame = mainFrame;
@@ -67,9 +71,40 @@ public class FreeSlotsPanel extends JPanel {
 
         JToggleButton selectAllSlots = selectAllSlotsButton("Вибрати всі", tableModel);
 
+        CheckBoxComboBox timeCombo = new CheckBoxComboBox(AppState.DEFAULT_HOURS_STR, selectedTimes);
+
+        JButton searchButton = getSearchButton();
+
         topPanel.add(selectAllSlots);
+        topPanel.add(timeCombo);
+        topPanel.add(searchButton);
 
         return topPanel;
+    }
+
+    private JButton getSearchButton() {
+        JButton searchButton = new JButton("Пошук");
+        searchButton.addActionListener(e -> {
+            if (selectedTimes.isEmpty()) {
+                refreshFreeSlots(scheduleSlotService.findFreeSlots(
+                        AppState.instructorNames,
+                        AppState.carNames,
+                        AppState.startDate,
+                        AppState.endDate
+                ));
+            } else {
+                List<ScheduleSlot> freeSlots = scheduleSlotService.findFreeSlots(
+                        AppState.instructorNames,
+                        AppState.carNames,
+                        AppState.startDate,
+                        AppState.endDate
+                );
+
+                List<ScheduleSlot> filteredFreeSlots = scheduleSlotService.filterSlotsByTime(freeSlots, selectedTimes);
+                refreshFreeSlots(filteredFreeSlots);
+            }
+        });
+        return searchButton;
     }
 
     private JToggleButton selectAllSlotsButton(String name, FreeSlotsTableModel tableModel) {
