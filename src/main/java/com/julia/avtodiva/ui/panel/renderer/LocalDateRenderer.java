@@ -1,4 +1,4 @@
-package com.julia.avtodiva.ui.panel.data.table.renderer;
+package com.julia.avtodiva.ui.panel.renderer;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;

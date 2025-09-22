@@ -21,4 +21,9 @@ public class WeekendServiceImpl implements WeekendService {
     public void deleteAllWeekends(List<Weekend> weekends) {
         weekendRepository.deleteAll(weekends);
     }
+
+    @Override
+    public void save(Weekend weekend) {
+        weekendRepository.save(weekend);
+    }
 }

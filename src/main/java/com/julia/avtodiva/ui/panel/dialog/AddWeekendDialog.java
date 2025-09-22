@@ -4,11 +4,12 @@ import com.julia.avtodiva.model.Instructor;
 import com.julia.avtodiva.model.Weekend;
 import com.julia.avtodiva.service.instructor.InstructorService;
 import com.julia.avtodiva.service.weekend.WeekendService;
+import com.julia.avtodiva.ui.util.MultiDateChooserDialog;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.*;
-import java.util.Collections;
+import java.util.List;
 import java.util.Date;
 import java.util.Locale;
 
@@ -25,7 +26,9 @@ public class AddWeekendDialog extends JDialog {
 
     private final ZoneId zone = ZoneId.systemDefault();
 
-    private JSpinner dateSp;
+    private JButton dateChooserBtn;
+    private List<LocalDate> selectedDates;
+
     private JSpinner fromSp;
     private JSpinner toSp;
 
@@ -44,7 +47,18 @@ public class AddWeekendDialog extends JDialog {
     }
 
     private void buildUI() {
-        dateSp = createDateSpinner(LocalDate.now(), zone);
+        dateChooserBtn = new JButton("Оберіть дні...");
+        dateChooserBtn.addActionListener(e -> {
+            MultiDateChooserDialog dlg = new MultiDateChooserDialog(this);
+            dlg.setVisible(true);
+            selectedDates = dlg.getSelectedDates();
+            if (selectedDates != null && !selectedDates.isEmpty()) {
+                dateChooserBtn.setText("Вибрано: " + selectedDates.size());
+            } else {
+                dateChooserBtn.setText("Оберіть дні...");
+            }
+        });
+
         fromSp = createTimeSpinner(LocalTime.of(7, 0), zone);
         toSp   = createTimeSpinner(LocalTime.of(19, 0), zone);
 
@@ -57,7 +71,7 @@ public class AddWeekendDialog extends JDialog {
         c.gridy = 2; form.add(new JLabel("Час до:"), c);
 
         c.gridx = 1; c.gridy = 0; c.anchor = GridBagConstraints.LINE_START;
-        form.add(dateSp, c);
+        form.add(dateChooserBtn, c);
         c.gridy = 1; form.add(fromSp, c);
         c.gridy = 2; form.add(toSp, c);
 
@@ -75,14 +89,14 @@ public class AddWeekendDialog extends JDialog {
     }
 
     private void onSave() {
-        try {
-            Date d  = (Date) dateSp.getValue();
-            Date df = (Date) fromSp.getValue();
-            Date dt = (Date) toSp.getValue();
+        if (selectedDates == null || selectedDates.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Оберіть хоча б одну дату!", "Помилка", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-            LocalDate day   = d.toInstant().atZone(zone).toLocalDate();
-            LocalTime tFrom = df.toInstant().atZone(zone).toLocalTime().withSecond(0).withNano(0);
-            LocalTime tTo   = dt.toInstant().atZone(zone).toLocalTime().withSecond(0).withNano(0);
+        try {
+            LocalTime tFrom = ((Date) fromSp.getValue()).toInstant().atZone(zone).toLocalTime().withSecond(0).withNano(0);
+            LocalTime tTo   = ((Date) toSp.getValue()).toInstant().atZone(zone).toLocalTime().withSecond(0).withNano(0);
 
             if (!tTo.isAfter(tFrom)) {
                 JOptionPane.showMessageDialog(this, "«Час до» повинен бути після «Час з».", "Помилка", JOptionPane.ERROR_MESSAGE);
@@ -90,32 +104,21 @@ public class AddWeekendDialog extends JDialog {
             }
 
             Instructor inst = instructorService.findById(instructorId);
-            Weekend w = new Weekend();
-            w.setDay(day);
-            w.setTimeFrom(tFrom);
-            w.setTimeTo(tTo);
-            w.setInstructor(inst);
 
-            weekendService.saveAllWeekends(Collections.singletonList(w));
-            JOptionPane.showMessageDialog(this, "Вихідний доданий", "Успіх", JOptionPane.INFORMATION_MESSAGE);
+            for (LocalDate day : selectedDates) {
+                Weekend w = new Weekend();
+                w.setDay(day);
+                w.setTimeFrom(tFrom);
+                w.setTimeTo(tTo);
+                w.setInstructor(inst);
+                weekendService.save(w);
+            }
+
+            JOptionPane.showMessageDialog(this, "Вихідні додані", "Успіх", JOptionPane.INFORMATION_MESSAGE);
             dispose();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Не вдалося зберегти вихідний. Перевірте дані.", "Помилка", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    // ===== helpers =====
-    private static JSpinner createDateSpinner(LocalDate value, ZoneId zone) {
-        Date init = Date.from(value.atStartOfDay(zone).toInstant());
-        SpinnerDateModel model = new SpinnerDateModel(init, null, null, java.util.Calendar.DAY_OF_MONTH);
-        JSpinner sp = new JSpinner(model);
-        JSpinner.DateEditor ed = new JSpinner.DateEditor(sp, "EEEE, dd.MM.yyyy");
-        java.text.DateFormatSymbols dfs = java.text.DateFormatSymbols.getInstance(new Locale("uk", "UA"));
-        ed.getFormat().setDateFormatSymbols(dfs);
-        sp.setEditor(ed);
-        sp.setPreferredSize(new Dimension(200, sp.getPreferredSize().height));
-        attachMouseWheelSupport(sp);
-        return sp;
     }
 
     private static JSpinner createTimeSpinner(LocalTime value, ZoneId zone) {

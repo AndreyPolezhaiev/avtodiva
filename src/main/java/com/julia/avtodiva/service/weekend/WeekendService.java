@@ -7,4 +7,5 @@ import java.util.List;
 public interface WeekendService {
     void saveAllWeekends(List<Weekend> weekends);
     void deleteAllWeekends(List<Weekend> weekends);
+    void save(Weekend weekend);
 }

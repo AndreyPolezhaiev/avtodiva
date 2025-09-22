@@ -1,18 +1,15 @@
-// src/main/java/com/julia/avtodiva/ui/panel/data/InstructorsPanel.java
 package com.julia.avtodiva.ui.panel.data;
 
 import com.julia.avtodiva.model.Instructor;
-import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.model.Weekend;
 import com.julia.avtodiva.service.instructor.InstructorService;
 import com.julia.avtodiva.service.weekend.WeekendService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
-import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.InstructorWeekendsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
-import com.julia.avtodiva.ui.panel.data.table.renderer.LocalDateRenderer;
+import com.julia.avtodiva.ui.panel.renderer.LocalDateRenderer;
 import com.julia.avtodiva.ui.panel.dialog.AddWeekendDialog;
 import com.julia.avtodiva.ui.state.AppState;
 import org.springframework.context.annotation.Lazy;
@@ -20,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.util.List;
 
 @Component
