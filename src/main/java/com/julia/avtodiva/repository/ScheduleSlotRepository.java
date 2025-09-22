@@ -165,4 +165,13 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
        WHERE s.instructor = :instructor
        """)
     LocalDate findMaxDateByInstructor(@Param("instructor") Instructor instructor);
+
+    @Query("""
+       SELECT s FROM ScheduleSlot s
+       WHERE s.booked = true
+         AND LOWER(s.instructor.name) = LOWER(:instructorName)
+       """)
+    List<ScheduleSlot> findAllBookedSlotsByInstructorName(
+            @Param("instructorName") String instructorName
+    );
 }

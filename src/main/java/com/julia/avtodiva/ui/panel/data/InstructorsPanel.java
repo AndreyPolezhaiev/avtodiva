@@ -3,6 +3,7 @@ package com.julia.avtodiva.ui.panel.data;
 import com.julia.avtodiva.model.Instructor;
 import com.julia.avtodiva.model.Weekend;
 import com.julia.avtodiva.service.instructor.InstructorService;
+import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.service.weekend.WeekendService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
@@ -24,11 +25,13 @@ public class InstructorsPanel extends JPanel {
     private final MainFrame mainFrame;
     private final InstructorService instructorService;
     private final WeekendService weekendService;
+    private final ScheduleSlotService scheduleSlotService;
 
-    public InstructorsPanel(@Lazy MainFrame mainFrame, InstructorService instructorService, WeekendService weekendService) {
+    public InstructorsPanel(@Lazy MainFrame mainFrame, InstructorService instructorService, WeekendService weekendService, ScheduleSlotService scheduleSlotService) {
         this.mainFrame = mainFrame;
         this.instructorService = instructorService;
         this.weekendService = weekendService;
+        this.scheduleSlotService = scheduleSlotService;
         setLayout(new BorderLayout());
     }
 
@@ -131,7 +134,8 @@ public class InstructorsPanel extends JPanel {
                     parent,
                     instructorId,
                     instructorService,
-                    weekendService
+                    weekendService,
+                    scheduleSlotService
             );
             dlg.setVisible(true);
 

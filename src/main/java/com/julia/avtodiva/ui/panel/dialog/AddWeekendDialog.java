@@ -1,8 +1,10 @@
 package com.julia.avtodiva.ui.panel.dialog;
 
 import com.julia.avtodiva.model.Instructor;
+import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.model.Weekend;
 import com.julia.avtodiva.service.instructor.InstructorService;
+import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.service.weekend.WeekendService;
 import com.julia.avtodiva.ui.util.MultiDateChooserDialog;
 
@@ -23,6 +25,7 @@ public class AddWeekendDialog extends JDialog {
     private final Long instructorId;
     private final InstructorService instructorService;
     private final WeekendService weekendService;
+    private final ScheduleSlotService scheduleSlotService;
 
     private final ZoneId zone = ZoneId.systemDefault();
 
@@ -35,11 +38,12 @@ public class AddWeekendDialog extends JDialog {
     public AddWeekendDialog(Window parent,
                             Long instructorId,
                             InstructorService instructorService,
-                            WeekendService weekendService) {
+                            WeekendService weekendService, ScheduleSlotService scheduleSlotService) {
         super(parent, "Додати вихідний", ModalityType.APPLICATION_MODAL);
         this.instructorId = instructorId;
         this.instructorService = instructorService;
         this.weekendService = weekendService;
+        this.scheduleSlotService = scheduleSlotService;
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         buildUI();
         pack();
@@ -105,6 +109,29 @@ public class AddWeekendDialog extends JDialog {
 
             Instructor inst = instructorService.findById(instructorId);
 
+            // 1. Проверяем все даты на конфликты
+            StringBuilder conflicts = new StringBuilder();
+            for (LocalDate day : selectedDates) {
+                List<ScheduleSlot> bookedSlots = scheduleSlotService.findAllBookedSlotsByInstructorName(inst.getName());
+
+                boolean conflict = bookedSlots.stream().anyMatch(slot ->
+                        selectedDates.contains(slot.getDate()) &&
+                                !(slot.getTimeTo().isBefore(tFrom) || slot.getTimeFrom().isAfter(tTo))
+                );
+
+                if (conflict) {
+                    conflicts.append(day).append(" має зайняті слоти!\n");
+                }
+            }
+
+            if (!conflicts.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Не вдалося зберегти вихідні:\n" + conflicts,
+                        "Конфлікт", JOptionPane.WARNING_MESSAGE);
+                return; // ❌ прекращаем сохранение
+            }
+
+            // 2. Если конфликтов нет — сохраняем все даты
             for (LocalDate day : selectedDates) {
                 Weekend w = new Weekend();
                 w.setDay(day);
@@ -114,7 +141,8 @@ public class AddWeekendDialog extends JDialog {
                 weekendService.save(w);
             }
 
-            JOptionPane.showMessageDialog(this, "Вихідні додані", "Успіх", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Вихідні додані",
+                    "Успіх", JOptionPane.INFORMATION_MESSAGE);
             dispose();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Не вдалося зберегти вихідний. Перевірте дані.", "Помилка", JOptionPane.ERROR_MESSAGE);

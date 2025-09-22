@@ -179,4 +179,9 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
                 .filter(slot -> selectedTimes.contains(slot.getTimeFrom().toString()))
                 .toList();
     }
+
+    @Override
+    public List<ScheduleSlot> findAllBookedSlotsByInstructorName(String instructorName) {
+        return scheduleSlotRepository.findAllBookedSlotsByInstructorName(instructorName);
+    }
 }
