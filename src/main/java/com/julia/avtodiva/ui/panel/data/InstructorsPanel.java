@@ -93,6 +93,31 @@ public class InstructorsPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Немає вибраних вихідних", "Попередження", JOptionPane.WARNING_MESSAGE);
                 return;
             }
+
+            Instructor inst = instructorService.findById(instructorId);
+            List<com.julia.avtodiva.model.ScheduleSlot> bookedSlots =
+                    scheduleSlotService.findAllBookedSlotsByInstructorName(inst.getName());
+
+            StringBuilder conflicts = new StringBuilder();
+
+            for (Weekend w : selected) {
+                boolean conflict = bookedSlots.stream().anyMatch(slot ->
+                        slot.getDate().equals(w.getDay()) &&
+                                !(slot.getTimeTo().isBefore(w.getTimeFrom()) || slot.getTimeFrom().isAfter(w.getTimeTo()))
+                );
+                if (conflict) {
+                    conflicts.append(w.getDay()).append(" має зайняті слоти!\n");
+                }
+            }
+
+            if (!conflicts.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Не вдалося зберегти вихідні:\n" + conflicts,
+                        "Конфлікт", JOptionPane.WARNING_MESSAGE);
+                refreshInstructor(inst);
+                return;
+            }
+
             weekendService.saveAllWeekends(selected);
             JOptionPane.showMessageDialog(this, "Вихідні успішно збережені", "Успіх", JOptionPane.INFORMATION_MESSAGE);
             Instructor fresh = instructorService.findById(instructorId);
