@@ -10,6 +10,7 @@ import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.panel.renderer.LocalDateRenderer;
 import com.julia.avtodiva.ui.panel.dialog.SlotDetailsDialog;
 import com.julia.avtodiva.ui.state.AppState;
+import com.julia.avtodiva.ui.util.CarNameParser;
 import com.julia.avtodiva.ui.util.CheckBoxComboBox;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -225,11 +227,13 @@ public class BookedSlotsPanel extends JPanel {
     private JButton getCopyButton(BookedSlotsTableModel tableModel) {
         JButton copyButton = new JButton("Копіювати вибране");
         copyButton.addActionListener(e -> {
-            java.util.List<ScheduleSlot> selectedSlots = tableModel.getSelectedSlots();
+            List<ScheduleSlot> selectedSlots = tableModel.getSelectedSlots();
             if (selectedSlots.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Немає вибраних рядків", "Попередження", JOptionPane.WARNING_MESSAGE);
                 return;
             }
+            selectedSlots.sort(Comparator.comparing(ScheduleSlot::getDate)
+                    .thenComparing(ScheduleSlot::getTimeFrom));
 
             StringBuilder sb = new StringBuilder();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
@@ -240,7 +244,7 @@ public class BookedSlotsPanel extends JPanel {
 
                 sb.append(formattedDate).append("\t")
                         .append(slot.getInstructor().getName()).append("\t")
-                        .append(slot.getCar().getName()).append("\t")
+                        .append(CarNameParser.parseCarName(slot.getCar().getName())).append("\t")
                         .append(slot.getTimeFrom() != null ? slot.getTimeFrom() : "")
                         .append("\n");
             }
