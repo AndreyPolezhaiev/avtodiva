@@ -1,20 +1,16 @@
 package com.julia.avtodiva.controller.migration;
 
 import com.julia.avtodiva.service.migration.MigrationService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/migrate")
+@RequiredArgsConstructor
 public class MigrationController {
     private final MigrationService migrationService;
-
-    @Autowired
-    public MigrationController(MigrationService migrationService) {
-        this.migrationService = migrationService;
-    }
 
     @PostMapping("/slots")
     public String migrate() {
