@@ -23,7 +23,7 @@ public class MainFrame extends JFrame {
                      SearchSlotsPanel searchSlotsPanel) {
         setTitle("Автошкола");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(800, 600);
+        setSize(1000, 700);
         setLocationRelativeTo(null);
 
         mainPanel = new JPanel(cardLayout);
@@ -32,21 +32,23 @@ public class MainFrame extends JFrame {
         JScrollPane allScroll = createScrollPane(allSlotsPanel);
         JScrollPane bookedScroll = createScrollPane(bookedSlotsPanel);
         JScrollPane instructorScroll = createScrollPane(instructorsPanel);
+        JScrollPane searchSlotsScroll = createScrollPane(searchSlotsPanel);
 
         mainPanel.add(rangeScroll, PanelName.RANGE_SELECTION_PANEL.name());
         mainPanel.add(freeScroll, PanelName.FREE_SLOTS_PANEL.name());
         mainPanel.add(allScroll, PanelName.ALL_SLOTS_PANEL.name());
         mainPanel.add(bookedScroll, PanelName.BOOKED_SLOTS_PANEL.name());
         mainPanel.add(instructorScroll, PanelName.INSTRUCTOR_WEEKEND_PANEL.name());
-        mainPanel.add(searchSlotsPanel, PanelName.SEARCH_SLOTS_PANEL.name());
+        mainPanel.add(searchSlotsScroll, PanelName.SEARCH_SLOTS_PANEL.name());
         add(mainPanel);
         showPanel(PanelName.RANGE_SELECTION_PANEL.name());
     }
 
     private JScrollPane createScrollPane(JComponent comp) {
         JScrollPane scrollPane = new JScrollPane(comp);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);   // скорость колёсика
-        scrollPane.getVerticalScrollBar().setBlockIncrement(50);  // PgUp/PgDn
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getVerticalScrollBar().setBlockIncrement(50);
+        scrollPane.getHorizontalScrollBar().setEnabled(false);
         return scrollPane;
     }
 

@@ -1,5 +1,10 @@
 package com.julia.avtodiva.ui.panel.data;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.swing.AutoCompleteSupport;
+import ca.odell.glazedlists.swing.EventComboBoxModel;
 import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.service.instructor.InstructorService;
 import com.julia.avtodiva.service.schedule.ScheduleSlotService;
@@ -12,6 +17,8 @@ import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.panel.renderer.LocalDateRenderer;
 import com.julia.avtodiva.ui.panel.dialog.SlotDetailsDialog;
 import com.julia.avtodiva.ui.state.AppState;
+import org.jdesktop.swingx.JXComboBox;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -21,8 +28,10 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @Component
 public class SearchSlotsPanel extends JPanel {
@@ -32,6 +41,53 @@ public class SearchSlotsPanel extends JPanel {
     private final InstructorService instructorService;
     private JComboBox<String> instructorCombo;
     private JComboBox<String> studentCombo;
+    private final EventList<String> studentsEventList = new BasicEventList<>();
+
+    // Таблица соответствий русские ↔ латинские
+    private static final Map<Character, Character> SIMILAR_MAP = Map.ofEntries(
+            Map.entry('а', 'a'), Map.entry('А', 'A'),
+            Map.entry('о', 'o'), Map.entry('О', 'O'),
+            Map.entry('е', 'e'), Map.entry('Е', 'E'),
+            Map.entry('р', 'p'), Map.entry('Р', 'P'),
+            Map.entry('с', 'c'), Map.entry('С', 'C'),
+            Map.entry('х', 'x'), Map.entry('Х', 'X'),
+            Map.entry('у', 'y'), Map.entry('У', 'Y'),
+            Map.entry('к', 'k'), Map.entry('К', 'K'),
+            Map.entry('м', 'm'), Map.entry('М', 'M'),
+            Map.entry('н', 'h'), Map.entry('Н', 'H'),
+            Map.entry('в', 'b'), Map.entry('В', 'B'),
+            Map.entry('т', 't'), Map.entry('Т', 'T'),
+            Map.entry('і', 'i'), Map.entry('І', 'I')
+    );
+
+    /**
+     * TextFilterator для поддержки поиска как на русском, так и на латинице.
+     * Транслитерирует имя, используя SIMILAR_MAP.
+     */
+    private static class CyrillicTextFilterator implements TextFilterator<String> {
+        @Override
+        public void getFilterStrings(List<String> baseList, String studentName) {
+            // 1. Добавляем исходное имя (для обычного поиска)
+            baseList.add(studentName);
+
+            // 2. Добавляем транслитерированное имя
+            StringBuilder sb = new StringBuilder();
+            for (char c : studentName.toCharArray()) {
+                // Заменяем букву, если найдено совпадение в карте
+                sb.append(SIMILAR_MAP.getOrDefault(c, c));
+            }
+            baseList.add(sb.toString());
+        }
+    }
+
+    private enum SearchMode {
+        INSTRUCTOR,
+        STUDENT,
+        BOTH,
+        NONE
+    }
+
+    private SearchMode lastSearchMode = SearchMode.NONE;
 
     public SearchSlotsPanel(@Lazy MainFrame mainFrame, ScheduleSlotService scheduleSlotService, StudentService studentService, InstructorService instructorService) {
         this.mainFrame = mainFrame;
@@ -72,6 +128,9 @@ public class SearchSlotsPanel extends JPanel {
     }
 
     private void updateCombos() {
+        String selectedInstructor = instructorCombo != null ? (String) instructorCombo.getSelectedItem() : null;
+        String selectedStudent = studentCombo != null ? (String) studentCombo.getSelectedItem() : null;
+
         String[] instructorsNames = instructorService.getInstructorsNames();
         String[] studentsNames = studentService.getStudentsNames();
 
@@ -79,12 +138,25 @@ public class SearchSlotsPanel extends JPanel {
             instructorCombo = new JComboBox<>(instructorsNames);
         } else {
             instructorCombo.setModel(new DefaultComboBoxModel<>(instructorsNames));
+            if (selectedInstructor != null && List.of(instructorsNames).contains(selectedInstructor)) {
+                instructorCombo.setSelectedItem(selectedInstructor);
+            }
         }
 
         if (studentCombo == null) {
-            studentCombo = new JComboBox<>(studentsNames);
+            studentsEventList.addAll(Arrays.asList(studentsNames));
+            EventComboBoxModel<String> studentModel = new EventComboBoxModel<>(studentsEventList);
+
+            studentCombo = new JXComboBox(studentModel);
+            studentCombo.setEditable(true);
+            AutoCompleteSupport.install(studentCombo, studentsEventList, new CyrillicTextFilterator());
+
         } else {
-            studentCombo.setModel(new DefaultComboBoxModel<>(studentsNames));
+            studentsEventList.addAll(Arrays.asList(studentsNames));
+
+            if (selectedStudent != null && studentsEventList.contains(selectedStudent)) {
+                studentCombo.setSelectedItem(selectedStudent);
+            }
         }
     }
 
@@ -160,6 +232,7 @@ public class SearchSlotsPanel extends JPanel {
 
             List<ScheduleSlot> result = scheduleSlotService.findByInstructorAndStudentNames(instructorName, studentName);
             updateSearchSlots(result, tableModel);
+            lastSearchMode = SearchMode.BOTH;
         });
 
         return searchInstructorAndStudentButton;
@@ -172,6 +245,7 @@ public class SearchSlotsPanel extends JPanel {
 
             List<ScheduleSlot> result = scheduleSlotService.findByInstructorName(instructorName);
             updateSearchSlots(result, tableModel);
+            lastSearchMode = SearchMode.INSTRUCTOR;
         });
 
         return searchInstructorAndStudentButton;
@@ -184,6 +258,7 @@ public class SearchSlotsPanel extends JPanel {
 
             List<ScheduleSlot> result = scheduleSlotService.findByStudentName(studentName);
             updateSearchSlots(result, tableModel);
+            lastSearchMode = SearchMode.STUDENT;
         });
 
         return searchInstructorAndStudentButton;
@@ -245,10 +320,7 @@ public class SearchSlotsPanel extends JPanel {
             }
 
             updateCombos();
-            String instructorName = (String) instructorCombo.getSelectedItem();
-            String studentName = (String) studentCombo.getSelectedItem();
-            List<ScheduleSlot> updatedSlots = scheduleSlotService.findByInstructorAndStudentNames(instructorName, studentName);
-            updateSearchSlots(updatedSlots, tableModel);
+            refreshAfterUpdate(tableModel);
         });
         return saveButton;
     }
@@ -290,15 +362,14 @@ public class SearchSlotsPanel extends JPanel {
         freeButton.addActionListener(e -> {
             if (table.isEditing()) table.getCellEditor().stopCellEditing();
 
-            int[] selectedRows = table.getSelectedRows();
-            if (selectedRows.length == 0) {
+            List<ScheduleSlot> selectedSlots = tableModel.getSelectedSlots();
+            if (selectedSlots.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Немає вибраних слотів", "Попередження", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             int freed = 0;
-            for (int row : selectedRows) {
-                ScheduleSlot slot = tableModel.getSlotAt(row);
+            for (ScheduleSlot slot : selectedSlots) {
                 if (slot.isBooked()) {
                     try {
                         // освобождаем слот
@@ -323,11 +394,22 @@ public class SearchSlotsPanel extends JPanel {
             }
 
             updateCombos();
-            String instructorName = (String) instructorCombo.getSelectedItem();
-            String studentName = (String) studentCombo.getSelectedItem();
-            List<ScheduleSlot> updatedSlots = scheduleSlotService.findByInstructorAndStudentNames(instructorName, studentName);
-            updateSearchSlots(updatedSlots, tableModel);
+            refreshAfterUpdate(tableModel);
         });
         return freeButton;
+    }
+
+    private void refreshAfterUpdate(SearchSlotsTableModel tableModel) {
+        String instructorName = (String) instructorCombo.getSelectedItem();
+        String studentName = (String) studentCombo.getSelectedItem();
+
+        List<ScheduleSlot> updatedSlots = switch (lastSearchMode) {
+            case BOTH -> scheduleSlotService.findByInstructorAndStudentNames(instructorName, studentName);
+            case INSTRUCTOR -> scheduleSlotService.findByInstructorName(instructorName);
+            case STUDENT -> scheduleSlotService.findByStudentName(studentName);
+            default -> List.of();
+        };
+
+        updateSearchSlots(updatedSlots, tableModel);
     }
 }
