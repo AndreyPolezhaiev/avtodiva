@@ -28,10 +28,8 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 @Component
 public class SearchSlotsPanel extends JPanel {
@@ -149,6 +147,15 @@ public class SearchSlotsPanel extends JPanel {
 
             studentCombo = new JXComboBox(studentModel);
             studentCombo.setEditable(true);
+            studentCombo.setMaximumRowCount(30);
+
+            if (studentsNames.length > 0) {
+                String longestName = Arrays.stream(studentsNames)
+                        .max(Comparator.comparingInt(String::length))
+                        .orElse(studentsNames[0]);
+                studentCombo.setPrototypeDisplayValue(longestName);
+            }
+
             AutoCompleteSupport.install(studentCombo, studentsEventList, new CyrillicTextFilterator());
 
         } else {
