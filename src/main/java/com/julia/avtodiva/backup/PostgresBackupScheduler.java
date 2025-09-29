@@ -19,7 +19,7 @@ public class PostgresBackupScheduler {
     private static final String DB_NAME = "avtodiva";
     private static final String DB_USER = "postgres";
     // PASSWORD HERE YOU CAN CHECK YOUR PASSWORD IN application.properties!!!!!
-    private static final String DB_PASSWORD = "1111";
+    private static final String DB_PASSWORD = "1925";
     // PASSWORD HERE YOU CAN CHECK YOUR PASSWORD IN application.properties!!!!!
 
     @PostConstruct
