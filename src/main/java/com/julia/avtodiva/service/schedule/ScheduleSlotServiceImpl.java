@@ -170,7 +170,7 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
 
     @Override
     public List<ScheduleSlot> findByStudentName(String studentName) {
-        return scheduleSlotRepository.findByStudentNameIgnoreCase(studentName);
+        return scheduleSlotRepository.findByStudentNameIgnoreCase(studentName.trim());
     }
 
     @Override

@@ -121,10 +121,10 @@ public class AllSlotsTableModel extends AbstractTableModel {
                 case 6 -> { // Ученица
                     if (aValue instanceof String name) {
                         if (slot.getStudent() != null) {
-                            slot.getStudent().setName(name);
+                            slot.getStudent().setName(name.trim());
                         } else {
                             Student student = new Student();
-                            student.setName(name);
+                            student.setName(name.trim());
                             slot.setStudent(student);
                         }
                     }
