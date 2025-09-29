@@ -134,7 +134,7 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
     @Query("""
        SELECT s FROM ScheduleSlot s
        WHERE LOWER(s.instructor.name) = LOWER(:instructorName)
-         AND LOWER(s.student.name) = LOWER(:studentName)
+         AND LOWER(TRIM(s.student.name)) = LOWER(TRIM(:studentName))
        """)
     List<ScheduleSlot> findByInstructorNameIgnoreCaseAndStudentNameIgnoreCase(
             @Param("instructorName") String instructorName,
@@ -151,7 +151,7 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
 
     @Query("""
        SELECT s FROM ScheduleSlot s
-       WHERE LOWER(s.student.name) = LOWER(:studentName)
+       WHERE LOWER(TRIM(s.student.name)) = LOWER(TRIM(:studentName))
        """)
     List<ScheduleSlot> findByStudentNameIgnoreCase(
             @Param("studentName") String studentName

@@ -122,10 +122,10 @@ public class BookedSlotsTableModel extends AbstractTableModel {
                 case 6 -> { // Ученица
                     if (aValue instanceof String name) {
                         if (slot.getStudent() != null) {
-                            slot.getStudent().setName(name);
+                            slot.getStudent().setName(name.trim());
                         } else {
                             Student student = new Student();
-                            student.setName(name);
+                            student.setName(name.trim());
                             slot.setStudent(student);
                         }
                     }
@@ -181,5 +181,92 @@ public class BookedSlotsTableModel extends AbstractTableModel {
             selected.set(i, select);
         }
         fireTableDataChanged();
+    }
+
+
+    // В классе FreeSlotsTableModel
+
+    /**
+     * Сортирует список слотов по указанному столбцу, сохраняя соответствие выделения.
+     *
+     * @param columnIndex Индекс столбца для сортировки.
+     * @param ascending Если true, сортировка по возрастанию; иначе по убыванию.
+     */
+    public void sortByColumn(int columnIndex, boolean ascending) {
+        Comparator<ScheduleSlot> slotComparator = null;
+
+        // ... (Определение slotComparator как в Шаге 1) ...
+
+        switch (columnIndex) {
+            case 1: // Дата
+                slotComparator = Comparator.comparing(ScheduleSlot::getDate, Comparator.nullsLast(Comparator.naturalOrder()));
+                break;
+            case 2: // Инструктор
+                slotComparator = Comparator.comparing(slot -> slot.getInstructor().getName(), Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+                break;
+            case 3: // Машина
+                slotComparator = Comparator.comparing(slot -> slot.getCar().getName(), Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+                break;
+            case 4: // Время с
+                slotComparator = Comparator.comparing(ScheduleSlot::getTimeFrom, Comparator.nullsLast(Comparator.naturalOrder()));
+                break;
+            case 5: // Время до
+                slotComparator = Comparator.comparing(ScheduleSlot::getTimeTo, Comparator.nullsLast(Comparator.naturalOrder()));
+                break;
+            case 6: // Ученица
+                slotComparator = Comparator.comparing(slot -> slot.getStudent() != null ? slot.getStudent().getName() : "", Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+                break;
+            case 7: // Описание
+                slotComparator = Comparator.comparing(ScheduleSlot::getDescription, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+                break;
+            case 8: // Ссылка
+                slotComparator = Comparator.comparing(ScheduleSlot::getLink, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+                break;
+            default:
+                return; // Не сортируем по этому столбцу
+        }
+
+        if (!ascending) {
+            slotComparator = slotComparator.reversed();
+        }
+
+        // --- Реализация безопасной сортировки ---
+
+        // 1. Создаем временный список пар (слот, выделение)
+        List<BookedSlotsTableModel.SlotSelectionPair> pairs = new ArrayList<>(slots.size());
+        for (int i = 0; i < slots.size(); i++) {
+            pairs.add(new BookedSlotsTableModel.SlotSelectionPair(slots.get(i), selected.get(i)));
+        }
+
+        // 2. Сортируем пары по компаратору слотов
+        Comparator<BookedSlotsTableModel.SlotSelectionPair> pairComparator = Comparator.comparing(BookedSlotsTableModel.SlotSelectionPair::getSlot, slotComparator);
+        pairs.sort(pairComparator);
+
+        // 3. Записываем отсортированные данные и выделение обратно
+        slots.clear();
+        selected.clear();
+        for (BookedSlotsTableModel.SlotSelectionPair pair : pairs) {
+            slots.add(pair.getSlot());
+            selected.add(pair.isSelected());
+        }
+
+        fireTableDataChanged();
+    }
+
+// ---------------------------------------------------------------------
+// Внутренний класс для связки слота и его статуса выделения
+// ---------------------------------------------------------------------
+
+    private static class SlotSelectionPair {
+        private final ScheduleSlot slot;
+        private final boolean selected;
+
+        public SlotSelectionPair(ScheduleSlot slot, boolean selected) {
+            this.slot = slot;
+            this.selected = selected;
+        }
+
+        public ScheduleSlot getSlot() { return slot; }
+        public boolean isSelected() { return selected; }
     }
 }

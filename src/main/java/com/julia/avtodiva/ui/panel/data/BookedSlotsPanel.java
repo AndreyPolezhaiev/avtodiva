@@ -44,6 +44,32 @@ public class BookedSlotsPanel extends JPanel {
 
         BookedSlotsTableModel tableModel = new BookedSlotsTableModel(bookedSlots);
         JTable table = new JTable(tableModel);
+
+        table.getTableHeader().addMouseListener(new MouseAdapter() {
+            // Внутреннее состояние для отслеживания направления сортировки
+            private int sortColumn = -1;
+            private boolean isAscending = true;
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int columnViewIndex = table.columnAtPoint(e.getPoint());
+                int columnIndex = table.convertColumnIndexToModel(columnViewIndex);
+
+                // Если кликнули по той же колонке, меняем направление
+                if (columnIndex == sortColumn) {
+                    isAscending = !isAscending;
+                } else {
+                    sortColumn = columnIndex;
+                    isAscending = true; // Новая колонка, начинаем с возрастания
+                }
+
+                // Вызываем новый метод сортировки в модели!
+                tableModel.sortByColumn(columnIndex, isAscending);
+
+                // Теперь все индексы модели и представления снова совпадают
+            }
+        });
+
         addStudentClickListener(table, tableModel);
         table.setRowHeight(AppState.COLUMN_HEIGHT);
 
