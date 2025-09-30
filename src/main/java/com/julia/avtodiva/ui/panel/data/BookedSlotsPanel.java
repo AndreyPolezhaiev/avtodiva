@@ -4,6 +4,7 @@ import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
+import com.julia.avtodiva.ui.panel.data.table.AllSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.BookedSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
@@ -16,8 +17,13 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.format.DateTimeFormatter;
@@ -25,11 +31,17 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 @Component
 public class BookedSlotsPanel extends JPanel {
     private final MainFrame mainFrame;
     private final ScheduleSlotService scheduleSlotService;
+
+    private JTextField searchField;
+    private JLabel searchLabel;
+    private TableRowSorter<BookedSlotsTableModel> sorter;
 
     private final List<String> selectedTimes = new ArrayList<>();
 
@@ -45,30 +57,10 @@ public class BookedSlotsPanel extends JPanel {
         BookedSlotsTableModel tableModel = new BookedSlotsTableModel(bookedSlots);
         JTable table = new JTable(tableModel);
 
-        table.getTableHeader().addMouseListener(new MouseAdapter() {
-            // Внутреннее состояние для отслеживания направления сортировки
-            private int sortColumn = -1;
-            private boolean isAscending = true;
+        sorter = new TableRowSorter<>(tableModel);
+        table.setRowSorter(sorter);
 
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int columnViewIndex = table.columnAtPoint(e.getPoint());
-                int columnIndex = table.convertColumnIndexToModel(columnViewIndex);
-
-                // Если кликнули по той же колонке, меняем направление
-                if (columnIndex == sortColumn) {
-                    isAscending = !isAscending;
-                } else {
-                    sortColumn = columnIndex;
-                    isAscending = true; // Новая колонка, начинаем с возрастания
-                }
-
-                // Вызываем новый метод сортировки в модели!
-                tableModel.sortByColumn(columnIndex, isAscending);
-
-                // Теперь все индексы модели и представления снова совпадают
-            }
-        });
+        setupSearchFunctionality(table);
 
         addStudentClickListener(table, tableModel);
         table.setRowHeight(AppState.COLUMN_HEIGHT);
@@ -107,7 +99,61 @@ public class BookedSlotsPanel extends JPanel {
         topPanel.add(timeCombo);
         topPanel.add(searchButton);
 
+        if (searchField != null) {
+            topPanel.add(searchLabel);
+            topPanel.add(searchField);
+        }
+
         return topPanel;
+    }
+
+    private void setupSearchFunctionality(JTable table) {
+        if (searchField == null) {
+            searchField = new JTextField(15);
+            searchLabel = new JLabel("Пошук (Ctrl+F):");
+            searchField.setVisible(false);
+            searchLabel.setVisible(false);
+        }
+
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            private void applyFilter() {
+                String text = searchField.getText();
+                if (text.isEmpty()) {
+                    sorter.setRowFilter(null);
+                } else {
+                    try {
+                        // Регулярное выражение для поиска подстроки без учета регистра
+                        String regex = "(?i).*" + Pattern.quote(text) + ".*";
+                        sorter.setRowFilter(RowFilter.regexFilter(regex));
+                    } catch (PatternSyntaxException e) {
+                        sorter.setRowFilter(null);
+                    }
+                }
+            }
+
+            @Override public void insertUpdate(DocumentEvent e) { applyFilter(); }
+            @Override public void removeUpdate(DocumentEvent e) { applyFilter(); }
+            @Override public void changedUpdate(DocumentEvent e) { applyFilter(); }
+        });
+
+        InputMap im = table.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = table.getActionMap();
+
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK), "startSearch");
+
+        am.put("startSearch", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                searchLabel.setVisible(true);
+                searchField.setVisible(true);
+
+                BookedSlotsPanel.this.revalidate();
+                BookedSlotsPanel.this.repaint();
+
+                searchField.requestFocusInWindow();
+                searchField.selectAll();
+            }
+        });
     }
 
     private JButton getSearchButton() {
@@ -154,14 +200,15 @@ public class BookedSlotsPanel extends JPanel {
                 int col = table.columnAtPoint(e.getPoint());
 
                 if (col >= 6 && row >= 0) { // колонка "Учениця"
-                    boolean isSelected = (Boolean) tableModel.getValueAt(row, 0);
-                    ScheduleSlot slot = tableModel.getSlotAt(row);
+                    int modelRow = table.convertRowIndexToModel(row);
+                    boolean isSelected = (Boolean) tableModel.getValueAt(modelRow, 0);
+                    ScheduleSlot slot = tableModel.getSlotAt(modelRow);
 
                     new SlotDetailsDialog(
                             SwingUtilities.getWindowAncestor(table),
                             tableModel,
                             slot,
-                            row,
+                            modelRow,
                             isSelected
                     ).setVisible(true);
                 }
@@ -297,7 +344,8 @@ public class BookedSlotsPanel extends JPanel {
 
             int freed = 0;
             for (int row : selectedRows) {
-                ScheduleSlot slot = tableModel.getSlotAt(row);
+                int modelRow = table.convertRowIndexToModel(row);
+                ScheduleSlot slot = tableModel.getSlotAt(modelRow);
                 if (slot.isBooked()) {
                     try {
                         // освобождаем слот

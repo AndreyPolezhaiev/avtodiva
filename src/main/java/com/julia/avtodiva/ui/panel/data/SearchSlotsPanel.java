@@ -3,6 +3,7 @@ package com.julia.avtodiva.ui.panel.data;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import ca.odell.glazedlists.swing.EventComboBoxModel;
 import com.julia.avtodiva.model.ScheduleSlot;
@@ -156,7 +157,11 @@ public class SearchSlotsPanel extends JPanel {
                 studentCombo.setPrototypeDisplayValue(longestName);
             }
 
-            AutoCompleteSupport.install(studentCombo, studentsEventList, new CyrillicTextFilterator());
+            AutoCompleteSupport<String> support = AutoCompleteSupport.install(
+                    studentCombo, studentsEventList, new CyrillicTextFilterator()
+            );
+
+            support.setFilterMode(TextMatcherEditor.CONTAINS);
 
         } else {
             studentsEventList.addAll(Arrays.asList(studentsNames));
