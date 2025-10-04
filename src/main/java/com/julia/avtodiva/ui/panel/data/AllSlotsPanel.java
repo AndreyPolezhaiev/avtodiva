@@ -275,7 +275,8 @@ public class AllSlotsPanel extends JPanel {
                                     + slot.getInstructor().getName()
                                     + " або іншим інструктором"
                                     + ", на машині " + slot.getCar().getName()
-                                    + ") вже зайнятий!",
+                                    + ") вже зайнятий! "
+                                    + " Або слот перепадає на вихідний",
                             "Помилка",
                             JOptionPane.WARNING_MESSAGE);
                 }

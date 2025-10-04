@@ -1,7 +1,9 @@
 package com.julia.avtodiva.service.schedule;
 
+import com.julia.avtodiva.model.Instructor;
 import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.model.Student;
+import com.julia.avtodiva.repository.InstructorRepository;
 import com.julia.avtodiva.repository.ScheduleSlotRepository;
 import com.julia.avtodiva.repository.StudentRepository;
 import com.julia.avtodiva.service.window.WorkingHoursProvider;
@@ -18,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScheduleSlotServiceImpl implements ScheduleSlotService {
     private final ScheduleSlotRepository scheduleSlotRepository;
+    private final InstructorRepository instructorRepository;
 
     @Override
     public List<ScheduleSlot> findAllSlots(List<String> instructorNames, List<String> carNames, LocalDate start, LocalDate end) {
@@ -71,6 +74,16 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
                         !existing.getCar().getName().equalsIgnoreCase(slot.getCar().getName()) ||
                         !existing.getDate().equals(slot.getDate()) ||
                         !existing.getTimeFrom().equals(slot.getTimeFrom());
+
+        Instructor instructor = instructorRepository.findByName(slot.getInstructor().getName()).orElse(null);
+        if (instructor != null && scheduleSlotRepository.existsWeekendConflict(
+                instructor,
+                slot.getDate(),
+                slot.getTimeFrom(),
+                slot.getTimeTo()
+        )) {
+            throw new IllegalStateException("Новий слот інструктора потрапляє у вихідний/неробочий час!");
+        }
 
         if (!changed) {
             // проверка: у машины не должно быть других занятых слотов в это время
@@ -137,7 +150,7 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
                     slot.getDate(),
                     slot.getTimeFrom(),
                     slot.getTimeTo(),
-                    target.getId()
+                    existing.getId()
             )) {
                 throw new IllegalStateException("Ця машина вже зайнята у цей час!");
             }
