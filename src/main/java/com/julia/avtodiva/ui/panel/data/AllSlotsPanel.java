@@ -10,7 +10,6 @@ import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.panel.renderer.LocalDateRenderer;
 import com.julia.avtodiva.ui.panel.dialog.SlotDetailsDialog;
 import com.julia.avtodiva.ui.state.AppState;
-import com.julia.avtodiva.ui.util.CarNameParser;
 import com.julia.avtodiva.ui.util.CheckBoxComboBox;
 import org.springframework.context.annotation.Lazy;
 
@@ -321,7 +320,7 @@ public class AllSlotsPanel extends JPanel {
 
                 sb.append(formattedDate).append("\t")
                         .append(slot.getInstructor().getName()).append("\t")
-                        .append(CarNameParser.parseCarName(slot.getCar().getName())).append("\t")
+                        .append(slot.getCar().getName()).append("\t")
                         .append(slot.getTimeFrom() != null ? slot.getTimeFrom() : "")
                         .append("\n");
             }
