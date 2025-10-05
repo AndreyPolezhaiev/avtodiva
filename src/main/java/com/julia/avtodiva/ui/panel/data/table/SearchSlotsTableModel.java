@@ -18,10 +18,7 @@ public class SearchSlotsTableModel extends AbstractTableModel {
 
     public SearchSlotsTableModel(List<ScheduleSlot> slots) {
         this.slots = new ArrayList<>(slots);
-        this.slots.sort(
-                Comparator.comparing(ScheduleSlot::getDate)
-                        .thenComparing(ScheduleSlot::getTimeFrom)
-        );
+        sortSlots();
 
         this.selected = new ArrayList<>();
         for (int i = 0; i < this.slots.size(); i++) {
@@ -178,10 +175,19 @@ public class SearchSlotsTableModel extends AbstractTableModel {
     public void updateSlots(List<ScheduleSlot> newSlots) {
         slots.clear();
         slots.addAll(newSlots);
+        sortSlots();
+
         selected.clear();
         for (int i = 0; i < slots.size(); i++) {
             selected.add(false);
         }
         fireTableDataChanged();
+    }
+
+    private void sortSlots() {
+        this.slots.sort(
+                Comparator.comparing(ScheduleSlot::getDate)
+                        .thenComparing(ScheduleSlot::getTimeFrom)
+        );
     }
 }
