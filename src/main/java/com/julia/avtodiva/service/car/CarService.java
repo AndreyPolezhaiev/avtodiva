@@ -6,4 +6,5 @@ public interface CarService {
     void saveCar(Car car);
     void deleteByName(String name);
     String[] getCarsNames();
+    Car findByName(String name);
 }

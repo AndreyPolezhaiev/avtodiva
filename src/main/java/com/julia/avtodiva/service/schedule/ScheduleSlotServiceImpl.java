@@ -1,8 +1,10 @@
 package com.julia.avtodiva.service.schedule;
 
+import com.julia.avtodiva.model.Car;
 import com.julia.avtodiva.model.Instructor;
 import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.model.Student;
+import com.julia.avtodiva.repository.CarRepository;
 import com.julia.avtodiva.repository.InstructorRepository;
 import com.julia.avtodiva.repository.ScheduleSlotRepository;
 import com.julia.avtodiva.repository.StudentRepository;
@@ -21,6 +23,7 @@ import java.util.List;
 public class ScheduleSlotServiceImpl implements ScheduleSlotService {
     private final ScheduleSlotRepository scheduleSlotRepository;
     private final InstructorRepository instructorRepository;
+    private final CarRepository carRepository;
 
     @Override
     public List<ScheduleSlot> findAllSlots(List<String> instructorNames, List<String> carNames, LocalDate start, LocalDate end) {
@@ -59,6 +62,41 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
     @Override
     public void updateSlot(ScheduleSlot slot) {
         scheduleSlotRepository.save(slot);
+    }
+
+    @Override
+    @Transactional
+    public void createSlot(ScheduleSlot newSlot) {
+        Instructor instructor = instructorRepository.findByName(newSlot.getInstructor().getName())
+                .orElseThrow(() -> new IllegalStateException("Instructor with name '" + newSlot.getInstructor().getName() + "' not found."));
+
+        Car car = carRepository.findByName(newSlot.getCar().getName())
+                .orElseThrow(() -> new IllegalStateException("Car with name '" + newSlot.getCar().getName() + "' not found."));
+
+
+        if (scheduleSlotRepository.existsWeekendConflict(
+                instructor,
+                newSlot.getDate(),
+                newSlot.getTimeFrom(),
+                newSlot.getTimeTo()
+        )) {
+            throw new IllegalStateException("Ошибка: Слот попадает на выходной или нерабочее время инструктора!");
+        }
+
+        // 2. Валидация: Проверка на конфликт с занятостью машины
+        if (scheduleSlotRepository.existsBookedCarConflict(
+                car,
+                newSlot.getDate(),
+                newSlot.getTimeFrom(),
+                newSlot.getTimeTo()
+        )) {
+            throw new IllegalStateException("Машина '" + newSlot.getCar().getName() + "' вже зайнята");
+        }
+
+        // 4. Если все проверки пройдены успешно, сохраняем новый слот в базу данных
+        newSlot.setInstructor(instructor);
+        newSlot.setCar(car);
+        scheduleSlotRepository.save(newSlot);
     }
 
     @Override

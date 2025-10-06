@@ -1,7 +1,6 @@
 package com.julia.avtodiva.service.car;
 
 import com.julia.avtodiva.model.Car;
-import com.julia.avtodiva.model.Instructor;
 import com.julia.avtodiva.repository.CarRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +31,11 @@ public class CarServiceImpl implements CarService {
                 .stream()
                 .map(Car::getName)
                 .toArray(String[]::new);
+    }
+
+    @Override
+    public Car findByName(String name) {
+        return carRepository.findByName(name).orElseThrow(() -> new RuntimeException("Can't find car by name: " + name));
     }
 
     @Override

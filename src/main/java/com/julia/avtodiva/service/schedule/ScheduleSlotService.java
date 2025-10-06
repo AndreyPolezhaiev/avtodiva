@@ -17,4 +17,5 @@ public interface ScheduleSlotService {
     List<ScheduleSlot> findByStudentName(String studentName);
     List<ScheduleSlot> filterSlotsByTime(List<ScheduleSlot> slots, List<String> selectedTimes);
     List<ScheduleSlot> findAllBookedSlotsByInstructorName(String instructorName);
+    void createSlot(ScheduleSlot newSlot);
 }
