@@ -143,6 +143,7 @@ public class RangeSelectionPanel extends JPanel {
 
     private JButton getAddSingleSlotButton(String name) {
         JButton button = new JButton(name);
+        button.setBackground(Color.decode("#bcdff7"));
         button.addActionListener(e -> {
             AddSingleSlotDialog dialog = new AddSingleSlotDialog(
                     (JFrame) SwingUtilities.getWindowAncestor(this), // 'this' - это ваша RangeSelectionPanel
