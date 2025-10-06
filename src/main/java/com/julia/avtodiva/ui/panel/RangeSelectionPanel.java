@@ -165,12 +165,12 @@ public class RangeSelectionPanel extends JPanel {
 
                 List<String> selectedInstructors = instructorButtons.stream()
                         .filter(AbstractButton::isSelected)
-                        .map(b -> b.getText().toLowerCase())
+                        .map(AbstractButton::getText)
                         .toList();
 
                 List<String> selectedCars = carButtons.stream()
                         .filter(AbstractButton::isSelected)
-                        .map(b -> b.getText().toLowerCase())
+                        .map(AbstractButton::getText)
                         .toList();
 
                 if (selectedInstructors.isEmpty() || selectedCars.isEmpty()) {
@@ -211,7 +211,7 @@ public class RangeSelectionPanel extends JPanel {
         viewButton.addActionListener(e -> {
             String selectedInstructor = instructorButtons.stream()
                     .filter(AbstractButton::isSelected)
-                    .map(b -> b.getText().toLowerCase())
+                    .map(AbstractButton::getText)
                     .findFirst()
                     .orElse(null);
 
