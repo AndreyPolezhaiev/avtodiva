@@ -15,8 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -67,36 +69,39 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
     @Override
     @Transactional
     public void createSlot(ScheduleSlot newSlot) {
-        Instructor instructor = instructorRepository.findByName(newSlot.getInstructor().getName())
-                .orElseThrow(() -> new IllegalStateException("Instructor with name '" + newSlot.getInstructor().getName() + "' not found."));
-
-        Car car = carRepository.findByName(newSlot.getCar().getName())
-                .orElseThrow(() -> new IllegalStateException("Car with name '" + newSlot.getCar().getName() + "' not found."));
-
-
-        if (scheduleSlotRepository.existsWeekendConflict(
-                instructor,
+        ScheduleSlot existing = scheduleSlotRepository.findByInstructorCarDateTime(
+                newSlot.getInstructor().getName().toLowerCase(),
+                newSlot.getCar().getName().toLowerCase(),
                 newSlot.getDate(),
-                newSlot.getTimeFrom(),
-                newSlot.getTimeTo()
-        )) {
-            throw new IllegalStateException("Ошибка: Слот попадает на выходной или нерабочее время инструктора!");
-        }
+                newSlot.getTimeFrom()
+        ).orElse(null);
 
-        // 2. Валидация: Проверка на конфликт с занятостью машины
-        if (scheduleSlotRepository.existsBookedCarConflict(
-                car,
-                newSlot.getDate(),
-                newSlot.getTimeFrom(),
-                newSlot.getTimeTo()
-        )) {
-            throw new IllegalStateException("Машина '" + newSlot.getCar().getName() + "' вже зайнята");
-        }
+        if (existing != null) {
+            if (existing.getStudent() != null) {
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
 
-        // 4. Если все проверки пройдены успешно, сохраняем новый слот в базу данных
-        newSlot.setInstructor(instructor);
-        newSlot.setCar(car);
-        scheduleSlotRepository.save(newSlot);
+                throw new IllegalStateException("Помилка: Запис на "
+                        + existing.getDate().format(dateFormatter)
+                        + " о "
+                        + existing.getTimeFrom().toString()
+                        + " вже існує!");
+            }
+            existing.setStudent(newSlot.getStudent());
+            existing.setDescription(newSlot.getDescription());
+            existing.setLink(newSlot.getLink());
+            existing.setBooked(newSlot.isBooked());
+            rescheduleSlot(existing);
+
+        } else {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
+
+            throw new IllegalStateException("Помилка: У інструктора "
+                    + newSlot.getInstructor().getName()
+                    + " не має місць на "
+                    + newSlot.getDate().format(dateFormatter)
+                    + " о "
+                    + newSlot.getTimeFrom().toString());
+        }
     }
 
     @Override
