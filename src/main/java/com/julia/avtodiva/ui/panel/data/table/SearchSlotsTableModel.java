@@ -5,6 +5,7 @@ import com.julia.avtodiva.model.Student;
 import com.julia.avtodiva.ui.state.AppState;
 
 import javax.swing.table.AbstractTableModel;
+import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -189,5 +190,12 @@ public class SearchSlotsTableModel extends AbstractTableModel {
                 Comparator.comparing(ScheduleSlot::getDate)
                         .thenComparing(ScheduleSlot::getTimeFrom)
         );
+    }
+
+    public void selectAll(boolean select) {
+        for (int i = 0; i < slots.size(); i++) {
+            selected.set(i, select);
+        }
+        fireTableDataChanged();
     }
 }

@@ -15,6 +15,7 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class AddSingleSlotDialog extends JDialog {
     private final ScheduleSlotService scheduleSlotService;
@@ -25,7 +26,7 @@ public class AddSingleSlotDialog extends JDialog {
     // UI компоненты
     private JXDatePicker datePicker;
     private JComboBox<LocalTime> timeFromCombo;
-    private JComboBox<LocalTime> timeToCombo;
+    private JTextField timeToField;
     private JComboBox<String> instructorCombo;
     private JComboBox<String> carCombo;
     private JTextField studentField;
@@ -56,8 +57,14 @@ public class AddSingleSlotDialog extends JDialog {
 
         datePicker = new JXDatePicker();
         datePicker.setDate(new java.util.Date());
+
         timeFromCombo = createTimeFromComboBox();
-        timeToCombo = createTimeToComboBox();
+        timeFromCombo.addActionListener(e -> updateEndTime());
+
+        timeToField = new JTextField(10);
+        timeToField.setEditable(false);
+        timeToField.setFont(timeToField.getFont().deriveFont(Font.BOLD));
+
         instructorCombo = new JComboBox<>(instructorService.getInstructorsNames());
         carCombo = new JComboBox<>(carService.getCarsNames());
         studentField = new JTextField(20);
@@ -77,7 +84,7 @@ public class AddSingleSlotDialog extends JDialog {
         gbc.gridx = 0; gbc.gridy++; formPanel.add(new JLabel("Час з:"), gbc);
         gbc.gridx = 1; formPanel.add(timeFromCombo, gbc);
         gbc.gridx = 0; gbc.gridy++; formPanel.add(new JLabel("Час до:"), gbc);
-        gbc.gridx = 1; formPanel.add(timeToCombo, gbc);
+        gbc.gridx = 1; formPanel.add(timeToField, gbc);
         gbc.gridx = 0; gbc.gridy++; formPanel.add(new JLabel("Інструктор:"), gbc);
         gbc.gridx = 1; formPanel.add(instructorCombo, gbc);
         gbc.gridx = 0; gbc.gridy++; formPanel.add(new JLabel("Машина:"), gbc);
@@ -99,6 +106,8 @@ public class AddSingleSlotDialog extends JDialog {
 
         add(formPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
+
+        updateEndTime();
     }
 
     private JComboBox<LocalTime> createTimeFromComboBox() {
@@ -110,13 +119,20 @@ public class AddSingleSlotDialog extends JDialog {
         return comboBox;
     }
 
-    private JComboBox<LocalTime> createTimeToComboBox() {
-        JComboBox<LocalTime> comboBox = new JComboBox<>();
-        comboBox.addItem(LocalTime.of(11, 0));
-        comboBox.addItem(LocalTime.of(14, 30));
-        comboBox.addItem(LocalTime.of(18, 0));
-        comboBox.addItem(LocalTime.of(20, 15));
-        return comboBox;
+    private void updateEndTime() {
+        LocalTime selectedTimeFrom = (LocalTime) timeFromCombo.getSelectedItem();
+        if (selectedTimeFrom == null) {
+            return;
+        }
+
+        LocalTime timeTo;
+        if (selectedTimeFrom.isAfter(LocalTime.of(18, 14))) {
+            timeTo = selectedTimeFrom.plusHours(2);
+        } else {
+            timeTo = selectedTimeFrom.plusHours(3);
+        }
+
+        timeToField.setText(timeTo.format(DateTimeFormatter.ofPattern("HH:mm")));
     }
 
     private void saveSlot() {
@@ -129,7 +145,12 @@ public class AddSingleSlotDialog extends JDialog {
         // 2. Сбор данных из формы
         LocalDate date = datePicker.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalTime timeFrom = (LocalTime) timeFromCombo.getSelectedItem();
-        LocalTime timeTo = (LocalTime) timeToCombo.getSelectedItem();
+        LocalTime timeTo;
+        if (timeFrom.isAfter(LocalTime.of(18, 14))) {
+            timeTo = timeFrom.plusHours(2);
+        } else {
+            timeTo = timeFrom.plusHours(3);
+        }
         String instructorName = (String) instructorCombo.getSelectedItem();
         String carName = (String) carCombo.getSelectedItem();
         String studentName = studentField.getText().trim();

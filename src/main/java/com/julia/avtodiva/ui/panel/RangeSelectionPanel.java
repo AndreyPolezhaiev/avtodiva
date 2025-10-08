@@ -36,7 +36,7 @@ public class RangeSelectionPanel extends JPanel {
     private final FreeSlotsPanel freeSlotsPanel;
     private final BookedSlotsPanel bookedSlotsPanel;
     private final SearchSlotsPanel searchSlotsPanel;
-    private final InstructorsPanel instructorsPanel;
+    private final InstructorWeekendsPanel instructorWeekendsPanel;
     @Autowired
     private final InstructorService instructorService;
     @Autowired
@@ -54,7 +54,7 @@ public class RangeSelectionPanel extends JPanel {
                                AllSlotsPanel allSlotsPanel,
                                FreeSlotsPanel freeSlotsPanel,
                                BookedSlotsPanel bookedSlotsPanel, SearchSlotsPanel searchSlotsPanel,
-                               InstructorsPanel instructorsPanel,
+                               InstructorWeekendsPanel instructorWeekendsPanel,
                                InstructorService instructorService, StudentService studentService) {
         this.mainFrame = mainFrame;
         this.scheduleSlotService = scheduleSlotService;
@@ -63,7 +63,7 @@ public class RangeSelectionPanel extends JPanel {
         this.freeSlotsPanel = freeSlotsPanel;
         this.bookedSlotsPanel = bookedSlotsPanel;
         this.searchSlotsPanel = searchSlotsPanel;
-        this.instructorsPanel = instructorsPanel;
+        this.instructorWeekendsPanel = instructorWeekendsPanel;
         this.instructorService = instructorService;
         this.studentService = studentService;
 
@@ -244,7 +244,7 @@ public class RangeSelectionPanel extends JPanel {
             AppState.instructorNames = List.of(selectedInstructor);
 
             Instructor instructor = instructorService.findByName(selectedInstructor);
-            instructorsPanel.refreshInstructor(instructor);
+            instructorWeekendsPanel.refreshInstructor(instructor);
 
             mainFrame.showPanel(PanelName.INSTRUCTOR_WEEKEND_PANEL.name());
         });

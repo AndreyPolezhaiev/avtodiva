@@ -12,6 +12,7 @@ import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.service.student.StudentService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
+import com.julia.avtodiva.ui.panel.data.table.InstructorWeekendsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.SearchSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
@@ -121,7 +122,6 @@ public class SearchSlotsPanel extends JPanel {
         add(buildTopPanel(tableModel), BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         add(createBottomPanel(tableModel, table), BorderLayout.SOUTH);
-
         revalidate();
         repaint();
     }
@@ -175,10 +175,12 @@ public class SearchSlotsPanel extends JPanel {
     private JPanel buildTopPanel(SearchSlotsTableModel tableModel) {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
+        JToggleButton selectAllSlots = selectAllSlotsButton("Вибрати всі", tableModel);
         JButton searchByInstructorAndStudentButton = getSearchByInstructorAndStudentButton("Пошук Разом", tableModel);
         JButton searchByInstructorButton = getSearchByInstructorButton("Пошук за інструктором", tableModel);
         JButton searchByStudentButton = getSearchByStudentButton("Пошук за ученицею", tableModel);
 
+        topPanel.add(selectAllSlots);
         topPanel.add(new JLabel("Інструктор:"));
         topPanel.add(instructorCombo);
         topPanel.add(new JLabel("Учениця:"));
@@ -424,5 +426,16 @@ public class SearchSlotsPanel extends JPanel {
         };
 
         updateSearchSlots(updatedSlots, tableModel);
+    }
+
+    private JToggleButton selectAllSlotsButton(String name, SearchSlotsTableModel tableModel) {
+        JToggleButton button = new JToggleButton(name);
+
+        button.addActionListener(e -> {
+            boolean selectAll = button.isSelected();
+            tableModel.selectAll(selectAll);
+        });
+
+        return button;
     }
 }

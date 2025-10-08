@@ -19,11 +19,11 @@ public class MainFrame extends JFrame {
                      FreeSlotsPanel freeSlotsPanel,
                      AllSlotsPanel allSlotsPanel,
                      BookedSlotsPanel bookedSlotsPanel,
-                     InstructorsPanel instructorsPanel,
+                     InstructorWeekendsPanel instructorWeekendsPanel,
                      SearchSlotsPanel searchSlotsPanel) {
         setTitle("Автошкола");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(1000, 700);
+        setSize(1080, 700);
         setLocationRelativeTo(null);
 
         mainPanel = new JPanel(cardLayout);
@@ -31,7 +31,7 @@ public class MainFrame extends JFrame {
         JScrollPane freeScroll = createScrollPane(freeSlotsPanel);
         JScrollPane allScroll = createScrollPane(allSlotsPanel);
         JScrollPane bookedScroll = createScrollPane(bookedSlotsPanel);
-        JScrollPane instructorScroll = createScrollPane(instructorsPanel);
+        JScrollPane instructorScroll = createScrollPane(instructorWeekendsPanel);
         JScrollPane searchSlotsScroll = createScrollPane(searchSlotsPanel);
 
         mainPanel.add(rangeScroll, PanelName.RANGE_SELECTION_PANEL.name());

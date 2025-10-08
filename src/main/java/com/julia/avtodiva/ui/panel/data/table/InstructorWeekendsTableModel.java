@@ -116,4 +116,11 @@ public class InstructorWeekendsTableModel extends AbstractTableModel {
         for (int i = 0; i < weekends.size(); i++) if (Boolean.TRUE.equals(selected.get(i))) out.add(weekends.get(i));
         return out;
     }
+
+    public void selectAll(boolean select) {
+        for (int i = 0; i < weekends.size(); i++) {
+            selected.set(i, select);
+        }
+        fireTableDataChanged();
+    }
 }

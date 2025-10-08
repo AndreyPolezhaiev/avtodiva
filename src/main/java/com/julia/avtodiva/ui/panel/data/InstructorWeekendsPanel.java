@@ -1,33 +1,40 @@
 package com.julia.avtodiva.ui.panel.data;
 
 import com.julia.avtodiva.model.Instructor;
+import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.model.Weekend;
 import com.julia.avtodiva.service.instructor.InstructorService;
 import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.service.weekend.WeekendService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
+import com.julia.avtodiva.ui.panel.data.table.FreeSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.InstructorWeekendsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.panel.renderer.LocalDateRenderer;
 import com.julia.avtodiva.ui.panel.dialog.AddWeekendDialog;
 import com.julia.avtodiva.ui.state.AppState;
+import com.julia.avtodiva.ui.util.CheckBoxComboBox;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 @Component
-public class InstructorsPanel extends JPanel {
+public class InstructorWeekendsPanel extends JPanel {
     private final MainFrame mainFrame;
     private final InstructorService instructorService;
     private final WeekendService weekendService;
     private final ScheduleSlotService scheduleSlotService;
 
-    public InstructorsPanel(@Lazy MainFrame mainFrame, InstructorService instructorService, WeekendService weekendService, ScheduleSlotService scheduleSlotService) {
+    public InstructorWeekendsPanel(@Lazy MainFrame mainFrame, InstructorService instructorService, WeekendService weekendService, ScheduleSlotService scheduleSlotService) {
         this.mainFrame = mainFrame;
         this.instructorService = instructorService;
         this.weekendService = weekendService;
@@ -58,6 +65,8 @@ public class InstructorsPanel extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         JScrollPane scrollPane = new JScrollPane(table);
+
+        add(buildTopPanel(tableModel), BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         add(createBottomPanel(tableModel, table, instructorId), BorderLayout.SOUTH);
 
@@ -65,8 +74,20 @@ public class InstructorsPanel extends JPanel {
         repaint();
     }
 
+    private JPanel buildTopPanel(InstructorWeekendsTableModel tableModel) {
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        JToggleButton selectAllSlots = selectAllSlotsButton("Вибрати всі", tableModel);
+
+        topPanel.add(selectAllSlots);
+
+        return topPanel;
+    }
+
     private JPanel createBottomPanel(InstructorWeekendsTableModel tableModel, JTable table, Long instructorId) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+        JButton copyButton = getCopyButton(tableModel);
 
         JButton addButton = getAddButton(table, instructorId);
 
@@ -77,6 +98,7 @@ public class InstructorsPanel extends JPanel {
         JButton backButton = new JButton("Назад");
         backButton.addActionListener(l -> mainFrame.showPanel(PanelName.RANGE_SELECTION_PANEL.name()));
 
+        panel.add(copyButton);
         panel.add(addButton);
         panel.add(deleteButton);
         panel.add(saveButton);
@@ -168,5 +190,50 @@ public class InstructorsPanel extends JPanel {
             refreshInstructor(fresh);
         });
         return addButton;
+    }
+
+    private JToggleButton selectAllSlotsButton(String name,InstructorWeekendsTableModel tableModel) {
+        JToggleButton button = new JToggleButton(name);
+
+        button.addActionListener(e -> {
+            boolean selectAll = button.isSelected();
+            tableModel.selectAll(selectAll);
+        });
+
+        return button;
+    }
+
+    private JButton getCopyButton(InstructorWeekendsTableModel tableModel) {
+        JButton copyButton = new JButton("Копіювати вибране");
+        copyButton.addActionListener(e -> {
+            List<Weekend> selectedWeekends = tableModel.getSelectedWeekends();
+            if (selectedWeekends.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Немає вибраних рядків", "Попередження", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            selectedWeekends.sort(Comparator.comparing(Weekend::getDay)
+                    .thenComparing(Weekend::getTimeFrom));
+
+            StringBuilder sb = new StringBuilder();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
+            for (Weekend weekend : selectedWeekends) {
+                String formattedDate = weekend.getDay() != null
+                        ? weekend.getDay().format(formatter)
+                        : "";
+
+                sb.append(formattedDate).append("\t")
+                        .append(weekend.getInstructor().getName()).append("\t")
+                        .append(weekend.getTimeFrom() != null ? weekend.getTimeFrom() : "").append("-")
+                        .append(weekend.getTimeTo() != null ? weekend.getTimeTo() : "")
+                        .append("\n");
+            }
+
+            StringSelection selection = new StringSelection(sb.toString());
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
+
+            JOptionPane.showMessageDialog(this, "Дані скопійовано у буфер обміну", "Інформація", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        return copyButton;
     }
 }
