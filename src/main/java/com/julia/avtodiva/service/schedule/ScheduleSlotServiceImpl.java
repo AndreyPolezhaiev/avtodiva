@@ -66,6 +66,33 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
         scheduleSlotRepository.save(slot);
     }
 
+    private void createExceptionSlot(ScheduleSlot exceptionSlot) {
+        Instructor instructor = instructorRepository.findByName(exceptionSlot.getInstructor().getName()).orElse(null);
+        Car car = carRepository.findByName(exceptionSlot.getCar().getName()).orElse(null);
+
+        if (instructor != null && scheduleSlotRepository.existsWeekendConflict(
+                instructor,
+                exceptionSlot.getDate(),
+                exceptionSlot.getTimeFrom(),
+                exceptionSlot.getTimeTo()
+        )) {
+            throw new IllegalStateException("Виключний слот інструктора потрапляє у вихідний/неробочий час!");
+        }
+
+        if (scheduleSlotRepository.existsBookedCarConflict(
+                car,
+                exceptionSlot.getDate(),
+                exceptionSlot.getTimeFrom(),
+                exceptionSlot.getTimeTo()
+        )) {
+            throw new IllegalStateException("Ця машина вже зайнята у цей час!");
+        }
+
+        exceptionSlot.setInstructor(instructor);
+        exceptionSlot.setCar(car);
+        scheduleSlotRepository.save(exceptionSlot);
+    }
+
     @Override
     @Transactional
     public void createSlot(ScheduleSlot newSlot) {
@@ -91,6 +118,9 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
             existing.setLink(newSlot.getLink());
             existing.setBooked(newSlot.isBooked());
             rescheduleSlot(existing);
+
+        } else if (newSlot.getInstructor().getName().equalsIgnoreCase("Юлія")) {
+            createExceptionSlot(newSlot);
 
         } else {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
