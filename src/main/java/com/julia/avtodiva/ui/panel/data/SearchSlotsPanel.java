@@ -7,6 +7,7 @@ import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.swing.AutoCompleteSupport;
 import ca.odell.glazedlists.swing.EventComboBoxModel;
 import com.julia.avtodiva.model.ScheduleSlot;
+import com.julia.avtodiva.service.car.CarService;
 import com.julia.avtodiva.service.instructor.InstructorService;
 import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.service.student.StudentService;
@@ -19,6 +20,7 @@ import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
 import com.julia.avtodiva.ui.panel.renderer.LocalDateRenderer;
 import com.julia.avtodiva.ui.panel.dialog.SlotDetailsDialog;
 import com.julia.avtodiva.ui.state.AppState;
+import com.julia.avtodiva.ui.util.SingleSlotButton;
 import org.jdesktop.swingx.JXComboBox;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.springframework.context.annotation.Lazy;
@@ -39,6 +41,7 @@ public class SearchSlotsPanel extends JPanel {
     private final ScheduleSlotService scheduleSlotService;
     private final StudentService studentService;
     private final InstructorService instructorService;
+    private final CarService carService;
     private JComboBox<String> instructorCombo;
     private JComboBox<String> studentCombo;
     private final EventList<String> studentsEventList = new BasicEventList<>();
@@ -89,11 +92,12 @@ public class SearchSlotsPanel extends JPanel {
 
     private SearchMode lastSearchMode = SearchMode.NONE;
 
-    public SearchSlotsPanel(@Lazy MainFrame mainFrame, ScheduleSlotService scheduleSlotService, StudentService studentService, InstructorService instructorService) {
+    public SearchSlotsPanel(@Lazy MainFrame mainFrame, ScheduleSlotService scheduleSlotService, StudentService studentService, InstructorService instructorService, CarService carService) {
         this.mainFrame = mainFrame;
         this.scheduleSlotService = scheduleSlotService;
         this.studentService = studentService;
         this.instructorService = instructorService;
+        this.carService = carService;
         setLayout(new BorderLayout());
     }
 
@@ -172,22 +176,54 @@ public class SearchSlotsPanel extends JPanel {
         }
     }
 
+    private void setButtonMargin(AbstractButton button) {
+        Insets insets = button.getMargin();
+        insets.left = 0;
+        insets.right = 0;
+        button.setMargin(insets);
+    }
+
     private JPanel buildTopPanel(SearchSlotsTableModel tableModel) {
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // --- ИЗМЕНЕНИЕ 1: Используем BoxLayout ---
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
+
+        // Добавляем отступ слева
+        topPanel.add(Box.createHorizontalStrut(5));
 
         JToggleButton selectAllSlots = selectAllSlotsButton("Вибрати всі", tableModel);
+        setButtonMargin(selectAllSlots);
+
         JButton searchByInstructorAndStudentButton = getSearchByInstructorAndStudentButton("Пошук Разом", tableModel);
+        setButtonMargin(searchByInstructorAndStudentButton);
+
         JButton searchByInstructorButton = getSearchByInstructorButton("Пошук за інструктором", tableModel);
+        setButtonMargin(searchByInstructorButton);
+
         JButton searchByStudentButton = getSearchByStudentButton("Пошук за ученицею", tableModel);
+        setButtonMargin(searchByStudentButton);
+
+        JButton singleSlotButton = getAddSingleSlotButton("Додати вікно");
+        setButtonMargin(singleSlotButton);
 
         topPanel.add(selectAllSlots);
+        topPanel.add(Box.createHorizontalStrut(2));
         topPanel.add(new JLabel("Інструктор:"));
+        topPanel.add(Box.createHorizontalStrut(2));
         topPanel.add(instructorCombo);
+        topPanel.add(Box.createHorizontalStrut(2));
         topPanel.add(new JLabel("Учениця:"));
+        topPanel.add(Box.createHorizontalStrut(2));
         topPanel.add(studentCombo);
-        topPanel.add(searchByInstructorAndStudentButton);
-        topPanel.add(searchByInstructorButton);
+        topPanel.add(Box.createHorizontalStrut(2));
         topPanel.add(searchByStudentButton);
+        topPanel.add(Box.createHorizontalStrut(2));
+        topPanel.add(singleSlotButton);
+        topPanel.add(Box.createHorizontalStrut(2));
+        topPanel.add(searchByInstructorAndStudentButton);
+        topPanel.add(Box.createHorizontalStrut(2));
+        topPanel.add(searchByInstructorButton);
+        topPanel.add(Box.createHorizontalStrut(2));
 
         return topPanel;
     }
@@ -437,5 +473,16 @@ public class SearchSlotsPanel extends JPanel {
         });
 
         return button;
+    }
+
+    public JButton getAddSingleSlotButton(String name) {
+        return new SingleSlotButton(
+                name,
+                (JFrame) SwingUtilities.getWindowAncestor(this),
+                scheduleSlotService,
+                instructorService,
+                carService,
+                studentService
+        );
     }
 }

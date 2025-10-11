@@ -12,6 +12,7 @@ import com.julia.avtodiva.ui.model.PanelName;
 import com.julia.avtodiva.ui.panel.data.*;
 import com.julia.avtodiva.ui.panel.dialog.*;
 import com.julia.avtodiva.ui.state.AppState;
+import com.julia.avtodiva.ui.util.SingleSlotButton;
 import org.jdesktop.swingx.JXDatePicker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -88,7 +89,7 @@ public class RangeSelectionPanel extends JPanel {
         endDatePicker.setFormats("dd.MM.yyyy");
         endDatePicker.setDate(Date.valueOf(LocalDate.now().plusDays(7)));
         topPanel.add(endDatePicker);
-        topPanel.add(getAddSingleSlotButton("Додати виключне вікно"));
+        topPanel.add(getAddSingleSlotButton("Додати вікно"));
 
         add(topPanel, BorderLayout.NORTH);
 
@@ -141,21 +142,15 @@ public class RangeSelectionPanel extends JPanel {
         repaint();
     }
 
-    private JButton getAddSingleSlotButton(String name) {
-        JButton button = new JButton(name);
-        button.setBackground(Color.decode("#bcdff7"));
-        button.addActionListener(e -> {
-            AddSingleSlotDialog dialog = new AddSingleSlotDialog(
-                    (JFrame) SwingUtilities.getWindowAncestor(this), // 'this' - это ваша RangeSelectionPanel
-                    scheduleSlotService,
-                    instructorService,
-                    carService,
-                    studentService
-            );
-            // Делаем диалог видимым. Код остановится здесь, пока диалог не будет закрыт.
-            dialog.setVisible(true);
-        });
-        return button;
+    public JButton getAddSingleSlotButton(String name) {
+        return new SingleSlotButton(
+                name,
+                (JFrame) SwingUtilities.getWindowAncestor(this),
+                scheduleSlotService,
+                instructorService,
+                carService,
+                studentService
+        );
     }
 
     @FunctionalInterface
