@@ -151,6 +151,8 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
         // достаём актуальный слот из базы по id
         ScheduleSlot existing = scheduleSlotRepository.findById(slot.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Slot not found"));
+        Car carFromRepo = carRepository.findByName(slot.getCar().getName())
+                .orElseThrow(() -> new IllegalArgumentException("Slot not found"));
 
         // проверяем, изменились ли ключевые поля
         boolean changed =
@@ -172,7 +174,7 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
         if (!changed) {
             // проверка: у машины не должно быть других занятых слотов в это время
             if (scheduleSlotRepository.existsBookedCarConflictExcluding(
-                    slot.getCar(),
+                    carFromRepo,
                     slot.getDate(),
                     slot.getTimeFrom(),
                     slot.getTimeTo(),
@@ -211,7 +213,7 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
 
             // проверка: у машины не должно быть других занятых слотов в это время
             if (scheduleSlotRepository.existsBookedCarConflictExcluding(
-                    slot.getCar(),
+                    carFromRepo,
                     slot.getDate(),
                     slot.getTimeFrom(),
                     slot.getTimeTo(),
@@ -230,11 +232,11 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
         } else {
 
             if (scheduleSlotRepository.existsBookedCarConflictExcluding(
-                    slot.getCar(),
+                    carFromRepo,
                     slot.getDate(),
                     slot.getTimeFrom(),
                     slot.getTimeTo(),
-                    existing.getId()
+                    null
             )) {
                 throw new IllegalStateException("Ця машина вже зайнята у цей час!");
             }
