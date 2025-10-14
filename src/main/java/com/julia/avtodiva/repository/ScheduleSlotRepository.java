@@ -147,6 +147,21 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
     );
 
     @Query("""
+    SELECT COUNT(s) > 0 FROM ScheduleSlot s
+    WHERE s.instructor = :instructor
+      AND s.date = :date
+      AND s.booked = true
+      AND s.timeFrom < :timeTo
+      AND s.timeTo > :timeFrom
+    """)
+    boolean existsBookedInstructorConflict(
+            @Param("instructor") Instructor instructor,
+            @Param("date") LocalDate date,
+            @Param("timeFrom") LocalTime timeFrom,
+            @Param("timeTo") LocalTime timeTo
+    );
+
+    @Query("""
     SELECT COUNT(w) > 0 FROM Weekend w
     WHERE w.instructor = :instructor
       AND w.day = :date

@@ -90,13 +90,22 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
             throw new IllegalStateException("Виключний слот інструктора потрапляє у вихідний/неробочий час!");
         }
 
-        if (scheduleSlotRepository.existsBookedCarConflict(
+        if (car != null && scheduleSlotRepository.existsBookedCarConflict(
                 car,
                 exceptionSlot.getDate(),
                 exceptionSlot.getTimeFrom(),
                 exceptionSlot.getTimeTo()
         )) {
             throw new IllegalStateException("Ця машина вже зайнята у цей час!");
+        }
+
+        if (scheduleSlotRepository.existsBookedInstructorConflict(
+                instructor,
+                exceptionSlot.getDate(),
+                exceptionSlot.getTimeFrom(),
+                exceptionSlot.getTimeTo()
+        )) {
+            throw new IllegalStateException("Цей інструктор вже зайнят у цей час!");
         }
 
         exceptionSlot.setInstructor(instructor);
@@ -182,6 +191,16 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
             )) {
                 throw new IllegalStateException("Ця машина вже зайнята у цей час!");
             }
+
+            if (scheduleSlotRepository.existsBookedInstructorConflict(
+                    instructor,
+                    slot.getDate(),
+                    slot.getTimeFrom(),
+                    slot.getTimeTo()
+            )) {
+                throw new IllegalStateException("Цей інструктор вже зайнят у цей час!");
+            }
+
             // ничего важного не изменилось → просто обновляем
             existing.setDescription(slot.getDescription());
             existing.setLink(slot.getLink());
@@ -222,6 +241,15 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
                 throw new IllegalStateException("Ця машина вже зайнята у цей час!");
             }
 
+            if (scheduleSlotRepository.existsBookedInstructorConflict(
+                    instructor,
+                    slot.getDate(),
+                    slot.getTimeFrom(),
+                    slot.getTimeTo()
+            )) {
+                throw new IllegalStateException("Цей інструктор вже зайнят у цей час!");
+            }
+
             // занимаем найденный слот
             target.setBooked(true);
             target.setStudent(slot.getStudent());
@@ -239,6 +267,15 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
                     null
             )) {
                 throw new IllegalStateException("Ця машина вже зайнята у цей час!");
+            }
+
+            if (scheduleSlotRepository.existsBookedInstructorConflict(
+                    instructor,
+                    slot.getDate(),
+                    slot.getTimeFrom(),
+                    slot.getTimeTo()
+            )) {
+                throw new IllegalStateException("Цей інструктор вже зайнят у цей час!");
             }
 
             // если такого слота ещё нет → создаём новый
