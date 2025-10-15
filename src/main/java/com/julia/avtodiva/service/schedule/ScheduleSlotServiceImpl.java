@@ -192,11 +192,12 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
                 throw new IllegalStateException("Ця машина вже зайнята у цей час!");
             }
 
-            if (scheduleSlotRepository.existsBookedInstructorConflict(
+            if (scheduleSlotRepository.existsBookedInstructorConflictExcluding(
                     instructor,
                     slot.getDate(),
                     slot.getTimeFrom(),
-                    slot.getTimeTo()
+                    slot.getTimeTo(),
+                    existing.getId()
             )) {
                 throw new IllegalStateException("Цей інструктор вже зайнят у цей час!");
             }
@@ -241,11 +242,12 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
                 throw new IllegalStateException("Ця машина вже зайнята у цей час!");
             }
 
-            if (scheduleSlotRepository.existsBookedInstructorConflict(
+            if (scheduleSlotRepository.existsBookedInstructorConflictExcluding(
                     instructor,
                     slot.getDate(),
                     slot.getTimeFrom(),
-                    slot.getTimeTo()
+                    slot.getTimeTo(),
+                    existing.getId()
             )) {
                 throw new IllegalStateException("Цей інструктор вже зайнят у цей час!");
             }
@@ -269,11 +271,12 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
                 throw new IllegalStateException("Ця машина вже зайнята у цей час!");
             }
 
-            if (scheduleSlotRepository.existsBookedInstructorConflict(
+            if (scheduleSlotRepository.existsBookedInstructorConflictExcluding(
                     instructor,
                     slot.getDate(),
                     slot.getTimeFrom(),
-                    slot.getTimeTo()
+                    slot.getTimeTo(),
+                    null
             )) {
                 throw new IllegalStateException("Цей інструктор вже зайнят у цей час!");
             }
