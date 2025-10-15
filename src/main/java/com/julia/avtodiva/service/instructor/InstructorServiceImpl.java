@@ -27,7 +27,7 @@ public class InstructorServiceImpl implements InstructorService {
         if (instructorRepository.existsByNameIgnoreCase(instructor.getName())) {
             throw new IllegalStateException("Інструктор з іменем '" + instructor.getName() + "' вже існує!");
         }
-        instructor.setName(instructor.getName().toLowerCase());
+        instructor.setName(instructor.getName());
         instructorRepository.save(instructor);
     }
 
