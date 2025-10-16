@@ -17,11 +17,15 @@ public class SearchSlotsTableModel extends AbstractTableModel {
     private final List<ScheduleSlot> slots;
     private final List<Boolean> selected;
 
+    private int sortedColumn = -1;
+    private boolean ascending = true;
+
     public SearchSlotsTableModel(List<ScheduleSlot> slots) {
         this.slots = new ArrayList<>(slots);
-        sortSlots();
-
         this.selected = new ArrayList<>();
+
+        applyCurrentSort();
+
         for (int i = 0; i < this.slots.size(); i++) {
             selected.add(false);
         }
@@ -176,7 +180,8 @@ public class SearchSlotsTableModel extends AbstractTableModel {
     public void updateSlots(List<ScheduleSlot> newSlots) {
         slots.clear();
         slots.addAll(newSlots);
-        sortSlots();
+
+        applyCurrentSort();
 
         selected.clear();
         for (int i = 0; i < slots.size(); i++) {
@@ -197,5 +202,66 @@ public class SearchSlotsTableModel extends AbstractTableModel {
             selected.set(i, select);
         }
         fireTableDataChanged();
+    }
+
+    private void applyCurrentSort() {
+        // Если колонка не была выбрана, используем сортировку по умолчанию
+        if (sortedColumn == -1) {
+            sortSlots(); // Старый метод сортировки по дате/времени
+            return;
+        }
+
+        Comparator<ScheduleSlot> comparator = switch (sortedColumn) {
+            case 1 -> Comparator.comparing(ScheduleSlot::getDate, Comparator.nullsLast(Comparator.naturalOrder()));
+            case 2 -> Comparator.comparing(slot -> slot.getInstructor().getName(), String.CASE_INSENSITIVE_ORDER);
+            case 3 -> Comparator.comparing(slot -> slot.getCar().getName(), String.CASE_INSENSITIVE_ORDER);
+            case 4 -> Comparator.comparing(ScheduleSlot::getTimeFrom, Comparator.nullsLast(Comparator.naturalOrder()));
+            case 6 -> Comparator.comparing(slot -> slot.getStudent() != null ? slot.getStudent().getName() : "", String.CASE_INSENSITIVE_ORDER);
+            default -> null;
+        };
+
+        if (comparator == null) return;
+
+        if (!ascending) {
+            comparator = comparator.reversed();
+        }
+
+        // Сохраняем выделение при сортировке
+        List<SlotSelectionPair> pairs = new ArrayList<>();
+        for (int i = 0; i < slots.size(); i++) {
+            pairs.add(new SlotSelectionPair(slots.get(i), selected.get(i)));
+        }
+
+        pairs.sort(Comparator.comparing(SlotSelectionPair::getSlot, comparator));
+
+        slots.clear();
+        selected.clear();
+        for (SlotSelectionPair pair : pairs) {
+            slots.add(pair.getSlot());
+            selected.add(pair.isSelected());
+        }
+    }
+
+    // --- ИЗМЕНЕНИЕ 2: Упрощаем sortByColumn, теперь он только устанавливает параметры и вызывает applyCurrentSort ---
+    public void sortByColumn(int columnIndex) {
+        if (columnIndex < 1) return;
+
+        if (sortedColumn == columnIndex) {
+            ascending = !ascending;
+        } else {
+            sortedColumn = columnIndex;
+            ascending = true;
+        }
+        applyCurrentSort();
+        fireTableDataChanged();
+    }
+
+    // Вспомогательный класс для сохранения выделения
+    private static class SlotSelectionPair {
+        private final ScheduleSlot slot;
+        private final boolean selected;
+        public SlotSelectionPair(ScheduleSlot slot, boolean selected) { this.slot = slot; this.selected = selected; }
+        public ScheduleSlot getSlot() { return slot; }
+        public boolean isSelected() { return selected; }
     }
 }

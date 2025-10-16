@@ -108,6 +108,9 @@ public class SearchSlotsPanel extends JPanel {
         
         SearchSlotsTableModel tableModel = new SearchSlotsTableModel(List.of());
         JTable table = new JTable(tableModel);
+        // sorting listener
+        addSortableHeader(table, tableModel);
+
         addStudentClickListener(table, tableModel);
         table.setRowHeight(AppState.COLUMN_HEIGHT);
 
@@ -128,6 +131,18 @@ public class SearchSlotsPanel extends JPanel {
         add(createBottomPanel(tableModel, table), BorderLayout.SOUTH);
         revalidate();
         repaint();
+    }
+
+    private void addSortableHeader(JTable table, SearchSlotsTableModel tableModel) {
+        table.getTableHeader().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int columnIndex = table.getTableHeader().columnAtPoint(e.getPoint());
+                if (columnIndex != -1) {
+                    tableModel.sortByColumn(columnIndex);
+                }
+            }
+        });
     }
 
     private void updateCombos() {
@@ -293,7 +308,7 @@ public class SearchSlotsPanel extends JPanel {
         searchInstructorAndStudentButton.addActionListener(e -> {
             String instructorName = (String) instructorCombo.getSelectedItem();
 
-            List<ScheduleSlot> result = scheduleSlotService.findByInstructorName(instructorName);
+            List<ScheduleSlot> result = scheduleSlotService.findAllBookedSlotsByInstructorName(instructorName);
             updateSearchSlots(result, tableModel);
             lastSearchMode = SearchMode.INSTRUCTOR;
         });
@@ -456,7 +471,7 @@ public class SearchSlotsPanel extends JPanel {
 
         List<ScheduleSlot> updatedSlots = switch (lastSearchMode) {
             case BOTH -> scheduleSlotService.findByInstructorAndStudentNames(instructorName, studentName);
-            case INSTRUCTOR -> scheduleSlotService.findByInstructorName(instructorName);
+            case INSTRUCTOR -> scheduleSlotService.findAllBookedSlotsByInstructorName(instructorName);
             case STUDENT -> scheduleSlotService.findByStudentName(studentName);
             default -> List.of();
         };
