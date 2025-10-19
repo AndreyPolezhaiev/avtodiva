@@ -183,7 +183,13 @@ public class SearchSlotsPanel extends JPanel {
             support.setFilterMode(TextMatcherEditor.CONTAINS);
 
         } else {
-            studentsEventList.addAll(Arrays.asList(studentsNames));
+            studentsEventList.getReadWriteLock().writeLock().lock();
+            try {
+                studentsEventList.clear();
+                studentsEventList.addAll(Arrays.asList(studentsNames));
+            } finally {
+                studentsEventList.getReadWriteLock().writeLock().unlock();
+            }
 
             if (selectedStudent != null && studentsEventList.contains(selectedStudent)) {
                 studentCombo.setSelectedItem(selectedStudent);

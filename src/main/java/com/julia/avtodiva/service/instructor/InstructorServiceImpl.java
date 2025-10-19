@@ -52,10 +52,8 @@ public class InstructorServiceImpl implements InstructorService {
 
     @Override
     public String[] getInstructorsNames() {
-        return instructorRepository.findAll()
-                .stream()
-                .map(Instructor::getName)
-                .toArray(String[]::new);
+        List<String> names = instructorRepository.findAllInstructorNames();
+        return names.toArray(new String[0]);
     }
 
     @Override

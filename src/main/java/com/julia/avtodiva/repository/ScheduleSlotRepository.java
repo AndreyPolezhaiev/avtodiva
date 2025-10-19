@@ -235,4 +235,7 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
     List<ScheduleSlot> findAllBookedSlotsByInstructorName(
             @Param("instructorName") String instructorName
     );
+
+    @Query("select distinct s.student.name from ScheduleSlot s where s.student.name is not null")
+    List<String> findDistinctStudentNames();
 }

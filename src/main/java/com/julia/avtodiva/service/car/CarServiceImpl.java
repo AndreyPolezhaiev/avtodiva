@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class CarServiceImpl implements CarService {
@@ -27,10 +29,8 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public String[] getCarsNames() {
-        return carRepository.findAll()
-                .stream()
-                .map(Car::getName)
-                .toArray(String[]::new);
+        List<String> names = carRepository.findAllCarNames();
+        return names.toArray(new String[0]);
     }
 
     @Override
