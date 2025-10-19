@@ -4,6 +4,7 @@ import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.service.schedule.ScheduleSlotService;
 import com.julia.avtodiva.ui.MainFrame;
 import com.julia.avtodiva.ui.model.PanelName;
+import com.julia.avtodiva.ui.panel.RangeSelectionPanel;
 import com.julia.avtodiva.ui.panel.data.table.BookedSlotsTableModel;
 import com.julia.avtodiva.ui.panel.data.table.editor.DateComboBoxEditor;
 import com.julia.avtodiva.ui.panel.data.table.editor.TimeComboBoxEditor;
@@ -75,7 +76,7 @@ public class BookedSlotsPanel extends JPanel {
         table.getColumnModel().getColumn(1).setCellRenderer(dateRenderer);
 
         JScrollPane scrollPane = new JScrollPane(table);
-
+        RangeSelectionPanel.autoResizeColumnWidths(table);
         add(buildTopPanel(tableModel), BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         add(createBottomPanel(tableModel, table), BorderLayout.SOUTH);
