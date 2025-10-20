@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class RangeSelectionPanel extends JPanel {
@@ -372,44 +371,5 @@ public class RangeSelectionPanel extends JPanel {
         return button;
     }
 
-    public static void autoResizeColumnWidths(JTable table) {
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
-        final Map<String, Integer> fixedWidths = Map.of(
-                "✓", 30,
-                "Опис", 70,
-                "Час з", 70,
-                "Час до", 70
-        );
-
-        for (int column = 0; column < table.getColumnCount(); column++) {
-            String columnName = table.getColumnName(column);
-            var col = table.getColumnModel().getColumn(column);
-
-            if (fixedWidths.containsKey(columnName)) {
-                int width = fixedWidths.get(columnName);
-                col.setMinWidth(width);
-                col.setPreferredWidth(width);
-                col.setMaxWidth(width);
-
-            } else if (columnName.equals("Посилання")) {
-
-            } else {
-                int maxWidth = 0;
-                java.awt.Component header = table.getTableHeader().getDefaultRenderer()
-                        .getTableCellRendererComponent(table, columnName, false, false, -1, column);
-                maxWidth = header.getPreferredSize().width;
-
-                for (int row = 0; row < table.getRowCount(); row++) {
-                    java.awt.Component cell = table.getCellRenderer(row, column)
-                            .getTableCellRendererComponent(table, table.getValueAt(row, column), false, false, row, column);
-                    maxWidth = Math.max(maxWidth, cell.getPreferredSize().width);
-                }
-                int width = maxWidth + 5;
-                col.setMinWidth(width);
-                col.setPreferredWidth(width);
-                col.setMaxWidth(width);
-            }
-        }
-    }
 }
