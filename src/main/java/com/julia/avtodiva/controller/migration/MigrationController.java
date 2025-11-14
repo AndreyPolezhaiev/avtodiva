@@ -24,7 +24,7 @@ public class MigrationController {
         return "Migration finished!";
     }
 
-    @GetMapping("/makeAllForOneHourEarlier")
+    @PostMapping("/makeAllForOneHourEarlier")
     public String minusHour() {
         migrationService.makeAllForOneHourEarlier();
         return "Every slot is earlier for 1 hour after December now!";
