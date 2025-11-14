@@ -8,7 +8,6 @@ import com.julia.avtodiva.repository.CarRepository;
 import com.julia.avtodiva.repository.InstructorRepository;
 import com.julia.avtodiva.repository.ScheduleSlotRepository;
 import com.julia.avtodiva.repository.StudentRepository;
-import com.julia.avtodiva.service.window.WorkingHoursProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;

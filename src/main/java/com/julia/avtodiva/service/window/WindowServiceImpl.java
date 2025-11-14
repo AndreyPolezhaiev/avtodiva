@@ -51,13 +51,13 @@ public class WindowServiceImpl implements WindowService {
 
     private int[][] getWorkingHours(String instructorName, LocalDate date) {
         int[][] fullDay = {
-                {8, 0}, {11, 30}, {15, 0}
+                {7, 0}, {10, 30}, {14, 0}
         };
         int[][] afternoon = {
-                {15, 0}, {18, 15}
+                {14, 0}, {17, 15}
         };
         int[][] upWork = {
-                {8, 0}, {11, 30}, {15, 0}, {18, 15}
+                {7, 0}, {10, 30}, {14, 0}, {17, 15}
         };
 
         if ("Юлія".equalsIgnoreCase(instructorName)) {
@@ -69,7 +69,7 @@ public class WindowServiceImpl implements WindowService {
                 return upWork;
             }
             else if (date.getDayOfWeek() == DayOfWeek.SATURDAY) {
-                return new int[][] {{16, 0}};
+                return new int[][] {{15, 0}};
             }
             else {
                 return afternoon;
@@ -95,7 +95,7 @@ public class WindowServiceImpl implements WindowService {
 
                 for (int j = 0; j < hours.length; j++) {
                     LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 18) ? from.plusHours(2) : from.plusHours(3);
+                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17) ? from.plusHours(2) : from.plusHours(3);
 
                     for (Car car : allCars) {
                         boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
@@ -137,7 +137,7 @@ public class WindowServiceImpl implements WindowService {
 
             for (int j = 0; j < hours.length; j++) {
                 LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 18) ? from.plusHours(2) : from.plusHours(3);
+                LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17) ? from.plusHours(2) : from.plusHours(3);
 
                 for (Car car : allCars) {
                     boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
@@ -177,7 +177,7 @@ public class WindowServiceImpl implements WindowService {
 
                 for (int j = 0; j < hours.length; j++) {
                     LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 18)
+                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17)
                             ? from.plusHours(2)
                             : from.plusHours(3);
 

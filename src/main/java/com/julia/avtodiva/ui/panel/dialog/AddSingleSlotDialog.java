@@ -112,10 +112,10 @@ public class AddSingleSlotDialog extends JDialog {
 
     private JComboBox<LocalTime> createTimeFromComboBox() {
         JComboBox<LocalTime> comboBox = new JComboBox<>();
-        comboBox.addItem(LocalTime.of(8, 0));
-        comboBox.addItem(LocalTime.of(11, 30));
-        comboBox.addItem(LocalTime.of(15, 0));
-        comboBox.addItem(LocalTime.of(18, 15));
+        comboBox.addItem(LocalTime.of(7, 0));
+        comboBox.addItem(LocalTime.of(10, 30));
+        comboBox.addItem(LocalTime.of(14, 0));
+        comboBox.addItem(LocalTime.of(17, 15));
         return comboBox;
     }
 
@@ -126,7 +126,7 @@ public class AddSingleSlotDialog extends JDialog {
         }
 
         LocalTime timeTo;
-        if (selectedTimeFrom.isAfter(LocalTime.of(18, 14))) {
+        if (selectedTimeFrom.isAfter(LocalTime.of(17, 14))) {
             timeTo = selectedTimeFrom.plusHours(2);
         } else {
             timeTo = selectedTimeFrom.plusHours(3);
@@ -146,7 +146,7 @@ public class AddSingleSlotDialog extends JDialog {
         LocalDate date = datePicker.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalTime timeFrom = (LocalTime) timeFromCombo.getSelectedItem();
         LocalTime timeTo;
-        if (timeFrom.isAfter(LocalTime.of(18, 14))) {
+        if (timeFrom.isAfter(LocalTime.of(17, 14))) {
             timeTo = timeFrom.plusHours(2);
         } else {
             timeTo = timeFrom.plusHours(3);

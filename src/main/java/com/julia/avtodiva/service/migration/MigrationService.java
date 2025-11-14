@@ -2,7 +2,6 @@ package com.julia.avtodiva.service.migration;
 
 import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.repository.ScheduleSlotRepository;
-import com.julia.avtodiva.service.window.WorkingHoursProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,5 +68,17 @@ public class MigrationService {
         }
     }
 
+    @Transactional
+    public void makeAllForOneHourEarlier() {
+        List<ScheduleSlot> allSlots = scheduleSlotRepository.findAll();
 
+        for (ScheduleSlot slot : allSlots) {
+            LocalDate date = slot.getDate();
+
+            if (date.getMonth().getValue() >= 12) {
+                slot.setTimeFrom(slot.getTimeFrom().minusHours(1));
+                slot.setTimeTo(slot.getTimeTo().minusHours(1));
+            }
+        }
+    }
 }

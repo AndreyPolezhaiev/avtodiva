@@ -3,6 +3,7 @@ package com.julia.avtodiva.controller.migration;
 import com.julia.avtodiva.service.migration.MigrationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,9 +18,15 @@ public class MigrationController {
         this.migrationService = migrationService;
     }
 
-    @PostMapping("/slots")
+    @PostMapping("/slotsToNewRules")
     public String migrate() {
         migrationService.migrateSlotsToNewRules();
         return "Migration finished!";
+    }
+
+    @GetMapping("/makeAllForOneHourEarlier")
+    public String minusHour() {
+        migrationService.makeAllForOneHourEarlier();
+        return "Every slot is earlier for 1 hour after December now!";
     }
 }
