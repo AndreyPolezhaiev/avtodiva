@@ -101,15 +101,6 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
         )) {
             throw new IllegalStateException("Ця машина або інструктор вже зайнята у цей час!");
         }
-//
-//        if (scheduleSlotRepository.existsBookedInstructorConflict(
-//                instructor,
-//                exceptionSlot.getDate(),
-//                exceptionSlot.getTimeFrom(),
-//                exceptionSlot.getTimeTo()
-//        )) {
-//            throw new IllegalStateException("Цей інструктор вже зайнят у цей час!");
-//        }
 
         exceptionSlot.setInstructor(instructor);
         exceptionSlot.setCar(car);
@@ -149,6 +140,8 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
         } else if (newSlot.getInstructor().getName().equalsIgnoreCase("Марина")) {
             createExceptionSlot(newSlot);
 
+        } else if (newSlot.getInstructor().getName().equalsIgnoreCase("Діна")) {
+            createExceptionSlot(newSlot);
         } else {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
 
