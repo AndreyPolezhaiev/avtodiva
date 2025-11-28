@@ -81,4 +81,17 @@ public class MigrationService {
             }
         }
     }
+
+    @Transactional
+    public void removeFreeSlotsForTanya() {
+        LocalDate dateFrom = LocalDate.of(2025, 12, 18);
+        List<ScheduleSlot> freeTanyaFordSlots = scheduleSlotRepository.findFreeSlotsFromDate("Таня", "Ford", dateFrom);
+        scheduleSlotRepository.deleteAll(freeTanyaFordSlots);
+    }
+
+    @Transactional
+    public void removeAllFreeSlots() {
+        List<ScheduleSlot> allFreeSlots = scheduleSlotRepository.findAllFreeSlots();
+        scheduleSlotRepository.deleteAll(allFreeSlots);
+    }
 }

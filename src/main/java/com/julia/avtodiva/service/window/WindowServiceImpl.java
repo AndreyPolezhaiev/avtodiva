@@ -86,18 +86,18 @@ public class WindowServiceImpl implements WindowService {
         List<Car> allCars = carRepository.findAll();
 
         for (Instructor instructor : allInstructors) {
-            LocalDate lastDate = scheduleSlotRepository.findMaxDateByInstructor(instructor);
-            LocalDate startDate = lastDate != null ? lastDate.plusDays(1) : LocalDate.now();
+            for (Car car : allCars) {
+                LocalDate lastDate = scheduleSlotRepository.findMaxFreeDateByInstructorAndCar(instructor, car);
+                LocalDate startDate = lastDate != null ? lastDate.plusDays(1) : LocalDate.now();
 
-            for (int i = 0; i < days; i++) {
-                LocalDate targetDate = startDate.plusDays(i);
-                int[][] hours = getWorkingHours(instructor.getName(), targetDate);
+                for (int i = 0; i < days; i++) {
+                    LocalDate targetDate = startDate.plusDays(i);
+                    int[][] hours = getWorkingHours(instructor.getName(), targetDate);
 
-                for (int j = 0; j < hours.length; j++) {
-                    LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17) ? from.plusHours(2) : from.plusHours(3);
+                    for (int j = 0; j < hours.length; j++) {
+                        LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
+                        LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17) ? from.plusHours(2) : from.plusHours(3);
 
-                    for (Car car : allCars) {
                         boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
                                 targetDate, from, instructor, car
                         );
@@ -122,44 +122,6 @@ public class WindowServiceImpl implements WindowService {
     }
 
     @Override
-    public void addFreeWindowsForInstructor(String instructorName, int days) {
-        Instructor instructor = instructorRepository.findByName(instructorName)
-                .orElseThrow(() -> new RuntimeException("Instructor not found"));
-
-        List<Car> allCars = carRepository.findAll();
-
-        LocalDate lastDate = scheduleSlotRepository.findMaxDateByInstructor(instructor);
-        LocalDate startDate = lastDate != null ? lastDate.plusDays(1) : LocalDate.now();
-
-        for (int i = 0; i < days; i++) {
-            LocalDate targetDate = startDate.plusDays(i);
-            int[][] hours = getWorkingHours(instructor.getName(), targetDate);
-
-            for (int j = 0; j < hours.length; j++) {
-                LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17) ? from.plusHours(2) : from.plusHours(3);
-
-                for (Car car : allCars) {
-                    boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
-                            targetDate, from, instructor, car
-                    );
-                    if (exists) continue;
-
-                    ScheduleSlot slot = new ScheduleSlot();
-                    slot.setDate(targetDate);
-                    slot.setTimeFrom(from);
-                    slot.setTimeTo(to);
-                    slot.setInstructor(instructor);
-                    slot.setCar(car);
-                    slot.setBooked(false);
-
-                    scheduleSlotRepository.save(slot);
-                }
-            }
-        }
-    }
-
-    @Override
     public void addFreeWindowsForCar(String carName, int days) {
         Car car = carRepository.findByName(carName)
                 .orElseThrow(() -> new RuntimeException("Car not found"));
@@ -168,7 +130,7 @@ public class WindowServiceImpl implements WindowService {
 
         for (Instructor instructor : allInstructors) {
             // стартуем с даты последнего слота у этого инструктора (важно!)
-            LocalDate lastDate = scheduleSlotRepository.findMaxDateByInstructorAndCar(instructor, car);
+            LocalDate lastDate = scheduleSlotRepository.findMaxFreeDateByInstructorAndCar(instructor, car);
             LocalDate startDate = lastDate != null ? lastDate.plusDays(1) : LocalDate.now();
 
             for (int i = 0; i < days; i++) {

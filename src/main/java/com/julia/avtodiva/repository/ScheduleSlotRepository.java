@@ -276,9 +276,11 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
     @Query("""
        SELECT MAX(s.date)
        FROM ScheduleSlot s
-       WHERE s.instructor = :instructor AND s.car = :car
+       WHERE s.instructor = :instructor
+         AND s.car = :car
+         AND s.booked = false
        """)
-    LocalDate findMaxDateByInstructorAndCar(@Param("instructor") Instructor instructor, @Param("car") Car car);
+    LocalDate findMaxFreeDateByInstructorAndCar(@Param("instructor") Instructor instructor, @Param("car") Car car);
 
     @Query("""
        SELECT s FROM ScheduleSlot s
@@ -292,4 +294,25 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
 
     @Query("SELECT DISTINCT st.name FROM ScheduleSlot s JOIN s.student st WHERE st.name IS NOT NULL")
     List<String> findDistinctStudentNames();
+
+    @Query("""
+       SELECT s FROM ScheduleSlot s
+       JOIN FETCH s.instructor i
+       JOIN FETCH s.car c
+       WHERE s.booked = false
+         AND LOWER(i.name) = LOWER(:instructor)
+         AND LOWER(c.name) = LOWER(:car)
+         AND s.date >= :fromDate
+       """)
+    List<ScheduleSlot> findFreeSlotsFromDate(
+            @Param("instructor") String instructor,
+            @Param("car") String car,
+            @Param("fromDate") LocalDate fromDate
+    );
+
+    @Query("""
+       SELECT s FROM ScheduleSlot s
+       WHERE s.booked = false
+       """)
+    List<ScheduleSlot> findAllFreeSlots();
 }

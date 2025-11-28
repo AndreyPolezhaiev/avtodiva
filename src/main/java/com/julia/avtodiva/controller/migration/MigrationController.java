@@ -29,4 +29,18 @@ public class MigrationController {
         migrationService.makeAllForOneHourEarlier();
         return "Every slot is earlier for 1 hour after December now!";
     }
+
+    @PostMapping("/removeFreeSlotsForTanyaAndFord")
+    public String removeMistakeCreatedSlots() {
+        // Remove free slots Tanya - Ford after 19 December 2025
+        migrationService.removeFreeSlotsForTanya();
+        return "Slots were removed successfully!";
+    }
+
+    @PostMapping("/removeAllFreeSlots")
+    public String removeAllFreeSlots() {
+        // Remove all free slots starting from 19 December 2025
+        migrationService.removeAllFreeSlots();
+        return "All free slots were removed successfully!";
+    }
 }
