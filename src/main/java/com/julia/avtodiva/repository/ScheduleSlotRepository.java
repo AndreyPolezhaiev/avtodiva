@@ -315,4 +315,14 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
        WHERE s.booked = false
        """)
     List<ScheduleSlot> findAllFreeSlots();
+
+    @Query("""
+       SELECT s FROM ScheduleSlot s
+       JOIN FETCH s.instructor i
+       WHERE s.booked = false
+         AND LOWER(i.name) = LOWER(:instructor)
+       """)
+    List<ScheduleSlot> findAllFreeSlotsByInstructorName(
+            @Param("instructor") String instructor
+    );
 }

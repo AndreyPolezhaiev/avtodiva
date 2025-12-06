@@ -43,4 +43,11 @@ public class MigrationController {
         migrationService.removeAllFreeSlots();
         return "All free slots were removed successfully!";
     }
+
+    @PostMapping("/removeAllFreeSlotsByInstructorName")
+    public String findAllFreeSlotsByInstructorName() {
+        // Remove all free slots starting from 19 December 2025
+        migrationService.removeAllFreeSlotsByInstructorName();
+        return "All free slots were removed successfully!";
+    }
 }

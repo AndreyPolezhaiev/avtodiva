@@ -118,9 +118,10 @@ public class RangeSelectionPanel extends JPanel {
         slotsPanel.add(showSearchPanelButton("Пошук за інструктором/ученицею"));
 
         // Правая колонка — управление справочниками
-        JPanel managePanel = new JPanel(new GridLayout(4, 1, 5, 5));
+        JPanel managePanel = new JPanel(new GridLayout(5, 1, 5, 5));
         managePanel.setBorder(BorderFactory.createTitledBorder("Справочники"));
         managePanel.add(addWindowsForCarButton("Додати місця для машини"));
+        managePanel.add(addWindowsForInstructorButton("Додати місця для інструктора"));
         managePanel.add(addFreeWindows("Додати вільні місця (всі)"));
         managePanel.add(addInstructorButton("Додати / видалити інструктора"));
         managePanel.add(addCarButton("Додати / видалити машину"));
@@ -352,5 +353,21 @@ public class RangeSelectionPanel extends JPanel {
         return button;
     }
 
-
+    private JButton addWindowsForInstructorButton(String name) {
+        JButton button = new JButton(name);
+        button.setBackground(new Color(40, 167, 69)); // bootstrap green
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setOpaque(true);
+        button.addActionListener(e -> {
+            AddWindowsForInstructorDialog dialog = new AddWindowsForInstructorDialog(
+                    (JFrame) SwingUtilities.getWindowAncestor(this),
+                    windowService,
+                    instructorService
+            );
+            dialog.setVisible(true);
+            buildUI(); // обновим панель после добавления
+        });
+        return button;
+    }
 }

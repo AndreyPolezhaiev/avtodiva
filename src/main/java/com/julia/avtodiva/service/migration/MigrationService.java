@@ -94,4 +94,12 @@ public class MigrationService {
         List<ScheduleSlot> allFreeSlots = scheduleSlotRepository.findAllFreeSlots();
         scheduleSlotRepository.deleteAll(allFreeSlots);
     }
+
+    @Transactional
+    public void removeAllFreeSlotsByInstructorName() {
+        List<ScheduleSlot> allFreeDinaSlots = scheduleSlotRepository.findAllFreeSlotsByInstructorName("Діна");
+        List<ScheduleSlot> allFreeYuliaSlots = scheduleSlotRepository.findAllFreeSlotsByInstructorName("Юлія");
+        scheduleSlotRepository.deleteAll(allFreeDinaSlots);
+        scheduleSlotRepository.deleteAll(allFreeYuliaSlots);
+    }
 }

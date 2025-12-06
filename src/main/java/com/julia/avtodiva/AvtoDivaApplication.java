@@ -15,7 +15,7 @@ public class AvtoDivaApplication {
 	public static void main(String[] args) {
 		System.setProperty("java.awt.headless", "false");
 
-        Dotenv dotenv = Dotenv.load();
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
         dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
 
 		ConfigurableApplicationContext context = SpringApplication.run(AvtoDivaApplication.class, args);
