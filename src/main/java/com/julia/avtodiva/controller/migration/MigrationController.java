@@ -50,4 +50,11 @@ public class MigrationController {
         migrationService.removeAllFreeSlotsByInstructorName();
         return "All free slots were removed successfully!";
     }
+
+    @PostMapping("/updateInstructorName")
+    public String UpdateInstructorName() {
+        // Remove all free slots starting from 19 December 2025
+        migrationService.updateInstructorName();
+        return "Instructor name Dina was updated on Anya!";
+    }
 }

@@ -1,6 +1,8 @@
 package com.julia.avtodiva.service.migration;
 
+import com.julia.avtodiva.model.Instructor;
 import com.julia.avtodiva.model.ScheduleSlot;
+import com.julia.avtodiva.repository.InstructorRepository;
 import com.julia.avtodiva.repository.ScheduleSlotRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,11 +12,13 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class MigrationService {
     private final ScheduleSlotRepository scheduleSlotRepository;
+    private final InstructorRepository instructorRepository;
 
     @Transactional
     public void migrateSlotsToNewRules() {
@@ -101,5 +105,12 @@ public class MigrationService {
         List<ScheduleSlot> allFreeYuliaSlots = scheduleSlotRepository.findAllFreeSlotsByInstructorName("Юлія");
         scheduleSlotRepository.deleteAll(allFreeDinaSlots);
         scheduleSlotRepository.deleteAll(allFreeYuliaSlots);
+    }
+
+    @Transactional
+    public void updateInstructorName() {
+        Instructor dina = instructorRepository.findByName("Діна").get();
+        dina.setName("Аня");
+        instructorRepository.save(dina);
     }
 }
