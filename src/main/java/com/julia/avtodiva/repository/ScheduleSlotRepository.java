@@ -325,4 +325,18 @@ public interface ScheduleSlotRepository extends JpaRepository<ScheduleSlot, Long
     List<ScheduleSlot> findAllFreeSlotsByInstructorName(
             @Param("instructor") String instructor
     );
+
+    // В репозитории создай:
+    @Query("""
+        SELECT s FROM ScheduleSlot s
+        JOIN FETCH s.instructor i
+        WHERE i.id = :instructorId
+        AND s.date = :date
+        AND s.timeFrom = :timeFrom
+        """)
+    Optional<ScheduleSlot> findByInstructorIdAndDateTime(
+            @Param("instructorId") Long instructorId,
+            @Param("date") LocalDate date,
+            @Param("timeFrom") LocalTime timeFrom
+    );
 }

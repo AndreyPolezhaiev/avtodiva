@@ -134,24 +134,28 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
             existing.setBooked(newSlot.isBooked());
             rescheduleSlot(existing);
 
-        } else if (newSlot.getInstructor().getName().equalsIgnoreCase("Юлія")) {
-            createExceptionSlot(newSlot);
-
-        } else if (newSlot.getInstructor().getName().equalsIgnoreCase("Марина")) {
-            createExceptionSlot(newSlot);
-
-        } else if (newSlot.getInstructor().getName().equalsIgnoreCase("Діна")) {
-            createExceptionSlot(newSlot);
         } else {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
-
-            throw new IllegalStateException("Помилка: У інструктора "
-                    + newSlot.getInstructor().getName()
-                    + " не має місць на "
-                    + newSlot.getDate().format(dateFormatter)
-                    + " о "
-                    + newSlot.getTimeFrom().toString());
+            createExceptionSlot(newSlot);
         }
+
+//        else if (newSlot.getInstructor().getName().equalsIgnoreCase("Юлія")) {
+//            createExceptionSlot(newSlot);
+//
+//        } else if (newSlot.getInstructor().getName().equalsIgnoreCase("Марина")) {
+//            createExceptionSlot(newSlot);
+//
+//        } else if (newSlot.getInstructor().getName().equalsIgnoreCase("Діна")) {
+//            createExceptionSlot(newSlot);
+//        } else {
+//            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
+//
+//            throw new IllegalStateException("Помилка: У інструктора "
+//                    + newSlot.getInstructor().getName()
+//                    + " не має місць на "
+//                    + newSlot.getDate().format(dateFormatter)
+//                    + " о "
+//                    + newSlot.getTimeFrom().toString());
+//        }
     }
 
     @Override
@@ -163,7 +167,6 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
                 .orElseThrow(() -> new IllegalArgumentException("Slot not found"));
         Car carFromRepo = carRepository.findByName(slot.getCar().getName())
                 .orElseThrow(() -> new IllegalArgumentException("Slot not found"));
-
         // проверяем, изменились ли ключевые поля
         boolean changed =
                 !existing.getInstructor().getName().equalsIgnoreCase(slot.getInstructor().getName()) ||
@@ -262,7 +265,6 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
             scheduleSlotRepository.save(target);
             return true;
         } else {
-
 //            if (scheduleSlotRepository.existsBookedCarConflictExcluding(
 //                    carFromRepo,
 //                    slot.getDate(),

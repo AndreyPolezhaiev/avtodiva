@@ -2,6 +2,7 @@ package com.julia.avtodiva.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public class Car {
 
     private String name;
 
+    @ToString.Exclude
     @OneToMany(
             mappedBy = "car",
             cascade = CascadeType.ALL,

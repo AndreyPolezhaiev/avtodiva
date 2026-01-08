@@ -34,6 +34,7 @@ public class Instructor {
     @ToString.Exclude
     private List<Weekend> weekends = new ArrayList<>();
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "instructor",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
