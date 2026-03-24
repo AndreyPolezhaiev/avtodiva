@@ -68,18 +68,6 @@ public class ScheduleSlotServiceImpl implements ScheduleSlotService {
     }
 
     private void createExceptionSlot(ScheduleSlot exceptionSlot) {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd.MM.yyyy", new Locale("uk", "UA"));
-
-        if (exceptionSlot.getTimeFrom().isAfter(LocalTime.of(14,59))
-                && !exceptionSlot.getInstructor().getName().equalsIgnoreCase("Марина")) {
-            throw new IllegalStateException("Помилка: У інструктора "
-                    + exceptionSlot.getInstructor().getName()
-                    + " не має місць на "
-                    + exceptionSlot.getDate().format(dateFormatter)
-                    + " о "
-                    + exceptionSlot.getTimeFrom().toString());
-        }
-
         Instructor instructor = instructorRepository.findByName(exceptionSlot.getInstructor().getName()).orElse(null);
         Car car = carRepository.findByName(exceptionSlot.getCar().getName()).orElse(null);
 
