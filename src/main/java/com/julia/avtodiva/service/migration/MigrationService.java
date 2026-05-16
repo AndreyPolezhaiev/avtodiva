@@ -1,9 +1,12 @@
 package com.julia.avtodiva.service.migration;
 
+import com.julia.avtodiva.model.Car;
 import com.julia.avtodiva.model.Instructor;
 import com.julia.avtodiva.model.ScheduleSlot;
 import com.julia.avtodiva.repository.InstructorRepository;
 import com.julia.avtodiva.repository.ScheduleSlotRepository;
+import com.julia.avtodiva.service.car.CarService;
+import com.julia.avtodiva.service.car.CarServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +22,7 @@ import java.util.Optional;
 public class MigrationService {
     private final ScheduleSlotRepository scheduleSlotRepository;
     private final InstructorRepository instructorRepository;
+    private final CarService carService;
 
     @Transactional
     public void migrateSlotsToNewRules() {
@@ -112,5 +116,12 @@ public class MigrationService {
         Instructor dina = instructorRepository.findByName("Діна").get();
         dina.setName("Аня");
         instructorRepository.save(dina);
+    }
+
+    @Transactional
+    public void updateCarName() {
+        Car toyotaSR = carService.findByName("Toyota Sr");
+        toyotaSR.setName("Toyota GR");
+        carService.saveCar(toyotaSR);
     }
 }

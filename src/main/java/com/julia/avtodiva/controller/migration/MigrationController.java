@@ -57,4 +57,11 @@ public class MigrationController {
         migrationService.updateInstructorName();
         return "Instructor name Dina was updated on Anya!";
     }
+
+    @PostMapping("/updateCarName")
+    public String UpdateCarName() {
+        // Remove all free slots starting from 19 December 2025
+        migrationService.updateCarName();
+        return "Toyota SR was updated on Toyota GR!";
+    }
 }

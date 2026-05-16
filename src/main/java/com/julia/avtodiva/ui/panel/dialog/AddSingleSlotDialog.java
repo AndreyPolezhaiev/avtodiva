@@ -125,12 +125,12 @@ public class AddSingleSlotDialog extends JDialog {
             return;
         }
 
-        LocalTime timeTo;
-        if (selectedTimeFrom.isAfter(LocalTime.of(17, 14))) {
-            timeTo = selectedTimeFrom.plusHours(2);
-        } else {
-            timeTo = selectedTimeFrom.plusHours(3);
-        }
+        LocalTime timeTo = selectedTimeFrom.plusHours(3);;
+//        if (selectedTimeFrom.isAfter(LocalTime.of(17, 14))) {
+//            timeTo = selectedTimeFrom.plusHours(2);
+//        } else {
+//            timeTo = selectedTimeFrom.plusHours(3);
+//        }
 
         timeToField.setText(timeTo.format(DateTimeFormatter.ofPattern("HH:mm")));
     }

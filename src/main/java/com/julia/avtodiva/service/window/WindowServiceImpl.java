@@ -10,10 +10,16 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class WindowServiceImpl implements WindowService {
+    private static final String JOIN = "-";
+
     private final WindowRepository windowRepository;
     private final ScheduleSlotRepository scheduleSlotRepository;
     private final CarRepository carRepository;
@@ -51,7 +57,7 @@ public class WindowServiceImpl implements WindowService {
 
     private int[][] getWorkingHours(String instructorName, LocalDate date) {
         int[][] fullDay = {
-                {7, 0}, {10, 30}, {14, 0}
+                {7, 0}, {10, 30}, {14, 0}, {17, 15}
         };
 //        int[][] afternoon = {
 //                {14, 0}, {17, 15}
@@ -96,8 +102,8 @@ public class WindowServiceImpl implements WindowService {
 
                     for (int j = 0; j < hours.length; j++) {
                         LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                        LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17) ? from.plusHours(2) : from.plusHours(3);
-
+//                        LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17) ? from.plusHours(2) : from.plusHours(3);
+                        LocalTime to = from.plusHours(3);
                         boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
                                 targetDate, from, instructor, car
                         );
@@ -139,9 +145,10 @@ public class WindowServiceImpl implements WindowService {
 
                 for (int j = 0; j < hours.length; j++) {
                     LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17)
-                            ? from.plusHours(2)
-                            : from.plusHours(3);
+//                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17)
+//                            ? from.plusHours(2)
+//                            : from.plusHours(3);
+                    LocalTime to = from.plusHours(3);
 
                     boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
                             targetDate, from, instructor, car
@@ -180,9 +187,10 @@ public class WindowServiceImpl implements WindowService {
 
                 for (int j = 0; j < hours.length; j++) {
                     LocalTime from = LocalTime.of(hours[j][0], hours[j][1]);
-                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17)
-                            ? from.plusHours(2)
-                            : from.plusHours(3);
+//                    LocalTime to = (j == hours.length - 1 && hours.length > 1 && hours[j][0] >= 17)
+//                            ? from.plusHours(2)
+//                            : from.plusHours(3);
+                    LocalTime to = from.plusHours(3);
 
                     boolean exists = scheduleSlotRepository.existsByDateAndTimeFromAndInstructorAndCar(
                             targetDate, from, instructor, car

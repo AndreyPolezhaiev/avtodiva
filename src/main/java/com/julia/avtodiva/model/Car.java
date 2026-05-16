@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,9 +13,7 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-
     @ToString.Exclude
     @OneToMany(
             mappedBy = "car",
@@ -24,5 +21,5 @@ public class Car {
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    private List<ScheduleSlot> slots = new ArrayList<>();
+    private List<ScheduleSlot> slots;
 }

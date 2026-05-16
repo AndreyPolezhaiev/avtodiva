@@ -1,9 +1,6 @@
 package com.julia.avtodiva.repository;
 
-import com.julia.avtodiva.model.Car;
-import com.julia.avtodiva.model.Instructor;
-import com.julia.avtodiva.model.ScheduleSlot;
-import com.julia.avtodiva.model.Student;
+import com.julia.avtodiva.model.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
