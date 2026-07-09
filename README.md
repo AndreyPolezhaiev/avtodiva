@@ -7,6 +7,7 @@ This project designed to handle school management operations with a focus on sca
 
 > 📸 **Visual Preview:** [System Screenshots](docs/AvtoDiva_Legacy_Overview.pdf) — view the application interface and key features.
 
+
 ## 🛠 Tech Stack
 
 * **Backend:** Java 21, Spring Boot, Java Swing.
