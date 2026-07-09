@@ -14,7 +14,7 @@ This project designed to handle school management operations with a focus on sca
 
 ## 🏗 Architecture Highlights
 
-* **Automatic backups:** It is configured the automatic functionality to make the DB snapshots.
+* **Automatic backups:** It is configured the automatic functionality to make the DB snapshots that will be stored in the `D:\backups`.
 
 
 ## 📂 Project Structure
